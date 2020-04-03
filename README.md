@@ -47,3 +47,9 @@ react hooks
 
 ### 1.1 编译脚本
 ### 1.2解构编译脚本eject
+
+> 执行yarn eject 解锁包
+
+效果：
+- 生成config 具体文件
+- package.json/dependencies 增加很多文件
