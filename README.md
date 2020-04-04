@@ -1,4 +1,5 @@
-# CodeTrain
+CodeTrain
+
 react hooks 
 
 - 首页
@@ -158,8 +159,148 @@ class Leaf extends Component {
 
 > 页面效果展示  Battery： 60
 
+
+
 ### 02  静态属性ContextType访问跨层级组件的数据
+
+> 改造Leaf 组件使用静态属性
+
+eg:
+```js
+class Leaf extends Component {
+    static contextType = Battery.Context;
+    render(){
+        const battery = this.context;
+        return (
+            <h1>Battery: {battery}</h1>
+        )
+    }
+}
+```
+
+
 
 ### 03  Lazy与Suspense实现延迟加载
 
-### 04  Memo实现指定组件进行渲染
++ 途径
+  - Webpack - code splitting
+  - import
+        ```js
+        import ('./about.js').then(code)
+        ```
+- 改写`App.js`
+    ```js
+    import React, { Component, lazy } from 'react';
+// import logo from './logo.svg';
+import './App.css';
+    ```
+
+
+// 异步引入关键code
+const About = lazy(() => import('./About.jsx'));
+
+class App extends Component {
+  render() { 
+    return ( 
+      <div>
+      <About />
+      </div>
+     );
+  }
+}
+
+export default App;
+    ```
+- 建立一个About.jsx文件
+    ```js
+    import React, {Component} from 'react'
+    ```
+
+export default class About extends Component {
+    
+    render() { 
+        return ( <h1>About</h1> );
+    }
+}
+
+    ```
+- Error
+    ```js
+    A React component suspended while rendering, but no fallback UI was specified
+    ```
+- 引入Suspense修改
+    ```js
+    // 异步引入自定义webpack名字
+      const About = lazy(() => import(/*webpackChunkName:'about'*/'./About.jsx'));
+
+      class App extends Component {
+        render() { 
+          return ( 
+            <div>
+            <Suspense fallback={<div>loading</div>}>
+            <About />
+            </Suspense>
+            </div>
+           );
+        }
+      }
+    ```
+- 捕获加载错误
+  ```js
+  ErrorBoundary +  componentDidCatch
+
+    import React, { Component, lazy, Suspense } from 'react';
+// import logo from './logo.svg';
+import './App.css';
+  ```
+
+// 异步引入自定义webpack名字
+const About = lazy(() => import(/*webpackChunkName:'about'*/'./About.jsx'));
+// 手动捕获错误方式 ErrorBoundary + componentDidCatch
+
+class App extends Component {
+
+    state = { hasError: false };
+
+  // 捕获错误第一种
+  // componentDidCatch() {
+  //   this.setState({
+  //     hasError: true
+  //   })
+  // }
+
+  // 第二种捕获静态方法
+  static getDerivedStateFormError(error){
+    return {
+      hasError: true
+    }
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (<div>error</div>)
+    }
+    return (
+      <div>
+        <Suspense fallback={<div>loading</div>}><About /></Suspense>
+      </div>
+​    );
+  }
+}
+
+export default App;
+
+###  4.React.Memo 实现指定组件渲染
+
+| 数据                 | 视图              |
+| -------------------- | ----------------- |
+| {data: 1}            | <div>1</div>      |
+| {data: 2}            | <div>1</div> 报错 |
+| 通过render {data: 2} | <div>2</div>      |
+
+
+
+  ```
+
+
+  ```
