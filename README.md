@@ -66,7 +66,34 @@ react hooks
 ### 01  Context实现跨层级的组件数据传递(包括多个Context)
 
 **Context定义**
-Context 提供了一种方式，能够让数据在组件树中传递而不必一级一级手动传递
+Context 提供了一种方式，能够让数据在组件树中传递而不必一级一级手动传递(注意一定把把订阅的组件包裹在其中，才可以获取到值)
+
+> Context文档
+
+- React.createContext
+    ```js
+        const MyContext = React.createContext(defaultValue);
+     创建一个Context对象，当react渲染一个订阅了这个Context对象的组件，这个组件从组件树中离自身最近的那个匹配Provider中读取到当前context值
+        
+    只有当组件所处的数没有匹配到Provider时，其defaultValue参数默认值才会生效，
+    注意：将undefined传递给Provider的value时候，消费组件的defaultValue不会生效。
+    ```
+- Context.Provider 生产组件
+   ```js
+   <MyContext.Provider value={value值}>
+   生产者允许消费组件订阅context的变化
+   Provider接收一个value属性值，传递给消费组件，可以使用多个Provider嵌套使用。
+    注意： Provider及其内部consumer组件都不受制于shouldComponentUpdate函数，因此当consumer组件在其祖先组件退出更新情况下也能更新。
+   ```
+- Context.Consumer 消费者订阅
+   ```js
+   <MyContext.Consumer>
+   {value => 基于context值进行渲染}
+   </MyContext.Consumer>
+   ```
+
+
+
 
 > 生产者爷爷级  动态实现数据
 

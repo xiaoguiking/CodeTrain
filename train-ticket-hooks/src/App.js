@@ -13,9 +13,9 @@ class Leaf extends Component {
         {
           battery => (
             <OnlineContext.Consumer>
-            {
-              online => (<h1>Battery: {battery}, Online: {String(online)}</h1>)
-           }
+              {
+                online => (<h1>Battery: {battery}, Online: {String(online)}</h1>)
+              }
             </OnlineContext.Consumer>
           )
         }
@@ -26,7 +26,6 @@ class Leaf extends Component {
 
 // 中间组件
 class Middle extends Component {
-
   render() {
     return (
       <Leaf />
@@ -55,8 +54,8 @@ class App extends Component {
           <button onClick={() => this.setState({ online: !online })}>
             Switch
       </button>
-        </OnlineContext.Provider>
         <Middle />
+        </OnlineContext.Provider>
       </BatteryContext.Provider>
     );
   }
