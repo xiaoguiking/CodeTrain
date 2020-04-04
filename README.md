@@ -290,7 +290,7 @@ class App extends Component {
 
 export default App;
 
-###  4.React.Memo 实现指定组件渲染
+###  4.React.Memo 实现指定组件渲染 性能优化
 
 | 数据                 | 视图              |
 | -------------------- | ----------------- |
@@ -298,9 +298,222 @@ export default App;
 | {data: 2}            | <div>1</div> 报错 |
 | 通过render {data: 2} | <div>2</div>      |
 
+  ```js
+
+优化典型模板
+import React, { Component } from 'react';
+// 父组件
+class Foo extends Component {
+  render() {
+    console.log('Foo render');
+    return null;
+  }
+}
+// 儿子组件
+class App extends Component {
+  state = {
+    count: 0
+  }
+  render() {
+    return (
+      <div>
+        <button type="button"
+          onClick={() => { this.setState({ count: this.state.count + 1 }) }}>
+          Button
+      </button>
+        <Foo name="nike" />
+      </div>
+    );
+  }
+}
+
+export default App;
 
 
+性能问题：  父组件多次渲染
   ```
 
+- shouldComponentUpdate(nextProps, nextState)
 
+  ```js
+  // 父组件
+  class Foo extends Component {
+    shouldComponentUpdate(nextProps, nextState){
+      if(nextProps.name === this.props.name){
+          return false;
+          // 不会渲染
+      }
+      return true;
+    }
+    render() {
+      console.log('Foo render');
+      return null;
+    }
+  }
   ```
+
+- PureComponent  局限性 传入属性本身对比， 属性内部不行，浅比较  ( 当 props 或者 state 某种程度是可变的话 )
+
+  正确修改案例
+
+  ​	
+
+  ```js
+  import React, {PureComponent} from 'react';
+  class Foo extends PureComponent {
+      render(){
+          console.log('Foo render');
+          return null;
+      }
+  }
+  ```
+
+  
+
+  正确渲染案例01
+
+  ​	
+
+  ```js
+  import React, { Component, PureComponent } from 'react';
+  
+  // 父组件
+  class Foo extends PureComponent { // 只有Props第一级发生改变才会重新渲染
+    render() {
+      console.log('Foo render');
+      return <div>{this.props.person.age}</div>;
+    }
+  }
+  // 儿子组件
+  class App extends Component {
+    state = {
+      count: 0,
+      person: {
+        age: 1
+      },
+    };
+    render() {
+      const person = this.state.person;
+      return (
+        <div>
+          <button type="button"
+            onClick={() => {
+                person.age++;
+                this.setState({ person, });
+            }}
+          >
+            Button
+          </button>
+          <Foo person={person} />
+        </div>
+      );
+    }
+  }
+  
+  export default App;
+  
+  ```
+
+  PureComponent 案例陷阱 回调 --- 解决方案有性能开销
+
+  ​	
+
+  ```js
+  import React, { Component, PureComponent } from 'react';
+  
+  // 父组件
+  class Foo extends PureComponent {
+    render() {
+      console.log('Foo render');
+      return <div>{this.props.person.age}</div>;
+    }
+  }
+  
+  
+  // 儿组件
+  class App extends Component {
+    state = {
+      count: 0,
+      person: {
+        age: 1
+      },
+    };
+  
+  // 解决回调
+  callback = () => {
+      
+  };
+    render() {
+      const person = this.state.person;
+      return (
+        <div>
+          <button type="button"
+            onClick={() => {
+                person.age++;
+                this.setState({count: this.state.count + 1});
+            }}
+          >
+            Button
+          </button>
+          <Foo person={person} cb={() => {}} />   // 回调多次渲染
+     		<Foo person={person} cb={this.callback} />   // 回调多次渲染 修改
+        </div>
+      );
+    }
+  }
+  
+  export default App;
+  
+  ```
+
+  
+
+- Memo 无状态组件性能优化
+
+  ```js
+  import React,{memo} from 'react';
+  
+  // 父级无状态组件
+  const Foo = memo(function Foo(props){
+      console.log('Foo render');
+      return (
+      	<div>{props.person.age}</div>
+      )
+  })
+  
+  // 儿组件
+  class App extends Component {
+    state = {
+      count: 0,
+      person: {
+        age: 1
+      },
+    };
+  
+  // 解决回调
+  callback = () => {
+      
+  };
+    render() {
+      const person = this.state.person;
+      return (
+        <div>
+          <button type="button"
+            onClick={() => {
+                person.age++;
+                this.setState({count: this.state.count + 1});
+            }}
+          >
+            Button
+          </button>
+          <Foo person={person} cb={() => {}} />   // 回调多次渲染
+     		<Foo person={person} cb={this.callback} />   // 回调多次渲染 修改
+        </div>
+      );
+    }
+  }
+  
+  export default App;
+  ```
+
+  
