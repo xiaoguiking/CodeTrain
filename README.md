@@ -168,7 +168,7 @@ class Leaf extends Component {
 eg:
 ```js
 class Leaf extends Component {
-    static contextType = Battery.Context;
+    static contextType = BatteryContext;
     render(){
         const battery = this.context;
         return (
@@ -193,37 +193,39 @@ class Leaf extends Component {
     import React, { Component, lazy } from 'react';
 // import logo from './logo.svg';
 import './App.css';
+    // 异步引入关键code
+    const About = lazy(() => import('./About.jsx'));
+    
+    class App extends Component {
+      render() { 
+        return ( 
+          <div>
+          <About />
+          </div>
+         );
+      }
+    }
+    
+    export default App;
+    
+    
+
     ```
 
-
-// 异步引入关键code
-const About = lazy(() => import('./About.jsx'));
-
-class App extends Component {
-  render() { 
-    return ( 
-      <div>
-      <About />
-      </div>
-     );
-  }
-}
-
-export default App;
-    ```
 - 建立一个About.jsx文件
     ```js
     import React, {Component} from 'react'
     ```
 
+```js
 export default class About extends Component {
-    
-    render() { 
-        return ( <h1>About</h1> );
-    }
+render() { 
+    return ( <h1>About</h1> );
+	}
 }
+```
 
-    ```
+
 - Error
     ```js
     A React component suspended while rendering, but no fallback UI was specified
@@ -250,45 +252,43 @@ export default class About extends Component {
   ErrorBoundary +  componentDidCatch
 
     import React, { Component, lazy, Suspense } from 'react';
-// import logo from './logo.svg';
-import './App.css';
-  ```
-
-// 异步引入自定义webpack名字
+	// import logo from './logo.svg';
+	import './App.css';
+	// 异步引入自定义webpack名字
 const About = lazy(() => import(/*webpackChunkName:'about'*/'./About.jsx'));
 // 手动捕获错误方式 ErrorBoundary + componentDidCatch
-
-class App extends Component {
-
-    state = { hasError: false };
-
-  // 捕获错误第一种
-  // componentDidCatch() {
-  //   this.setState({
-  //     hasError: true
-  //   })
-  // }
-
-  // 第二种捕获静态方法
-  static getDerivedStateFormError(error){
-    return {
-      hasError: true
+  class App extends Component {
+  
+      state = { hasError: false };
+  
+    // 捕获错误第一种
+    // componentDidCatch() {
+    //   this.setState({
+    //     hasError: true
+    //   })
+    // }
+  
+    // 第二种捕获静态方法
+    static getDerivedStateFormError(error){
+      return {
+        hasError: true
+      }
+    };
+  
+    render() {
+      if (this.state.hasError) {
+        return (<div>error</div>)
+      }
+      return (
+        <div>
+          <Suspense fallback={<div>loading</div>}><About /></Suspense>
+        </div>
+    );
     }
-  };
-
-  render() {
-    if (this.state.hasError) {
-      return (<div>error</div>)
-    }
-    return (
-      <div>
-        <Suspense fallback={<div>loading</div>}><About /></Suspense>
-      </div>
-​    );
   }
-}
-
-export default App;
+  
+  export default App;
+  ```
 
 ###  4.React.Memo 实现指定组件渲染 性能优化
 
@@ -299,6 +299,7 @@ export default App;
 | 通过render {data: 2} | <div>2</div>      |
 
   ```js
+
 
 优化典型模板
 import React, { Component } from 'react';
@@ -618,12 +619,6 @@ export default StateHooks;
 
 
 
-###  4.Context Hooks 
-
-### 5.使用Memo&Callback Hooks 
-
-###  6.使用Ref Hooks 	
-
 ```js
 import React, { Component } from 'react';
 
@@ -783,6 +778,69 @@ const EffectHooks = () => {
 
 
 
+###  4.Context Hooks 	
+
+```js
+import React, { Component, createContext, useState, useContext } from 'react'
+
+const CountContext = createContext();
+class Foo extends Component {
+    render() { 
+        return ( 
+            <CountContext.Consumer>
+            {
+                count => <h1>{count}</h1>
+            }
+            </CountContext.Consumer>
+         );
+    }
+}
+ 
+// 使用静态方法
+class Bar extends Component {
+    static contextType = CountContext;
+    render() { 
+        const count = this.context;
+        console.log(count);
+        return ( 
+            <h1>{count}</h1>
+         );
+    }
+}
+
+//  Context函数式
+function Counter () {
+    const count = useContext(CountContext)  
+    return (
+        <h1>{count}</h1>
+    )
+}
+const ContextHooks = () => {
+    const [count, setCount] = useState(0)
+    return (
+        <div>
+            <button onClick={() => {setCount(count + 1 )}}>
+                Click {count}
+            </button>
+            <CountContext.Provider value={count}>
+                <Foo />
+                <Bar />
+                <Counter />
+            </CountContext.Provider>
+        </div>
+    )
+}
+
+
+export default ContextHooks;
+```
+
+
+
+### 5.使用Memo&Callback Hooks 
+
+###  6.使用Ref Hooks 	
+
 ### 7.自定义Hooks 
 
 ###   8.Hooks的使用法则 
@@ -823,15 +881,55 @@ const EffectHooks = () => {
 
 
 
-## 第六章项目重点火车票业务架构
+## 第六章项目重点火车票业务架构(video)
 
-###  项目业务选型以及演示分析 
+###  1.项目业务选型以及演示分析 
 
-###   项目模块交互设计演示与分析 
 
-###   项目工程初始化 
 
-###   为项目搭建Mock Server 
+###   2.项目模块交互设计演示与分析 
+
+
+
+###   3.项目工程初始化 
+
+**项目改造**
+
+- 移除无关代码
+- 创建必要的4个页面文件
+- 改写webpackconfig编译多个页面
+
++ src下创建 mkdir index
+  - touch action.js
+  - touch App.css
+  - touch App.jsx
+  - touch index.css
+  - touch index.js
+  - touch reducers.js
+  - touch store.js
+
+
+
+​		`src/index/index.js`
+
+```
+import React from 'react';
+import ReactDom from 'react-dom';
+import {Provider} from 'react-redux';
+import 'normalize.css/';  // 清除浏览器全局样式
+import store from './store';
+import './index.css';
+import App from './App';
+
+ReactDom.render(
+    <Provider store={store}><App /></Provider>, 
+    document.getElementById('root')
+    );
+```
+
+
+
+###   4.为项目搭建Mock Server 
 
 
 
@@ -839,13 +937,19 @@ const EffectHooks = () => {
 
 ### 1数据结构设计
 
+
+
 ### 2顶部导航栏
 
 
 
 ###  3始发终到站
 
+
+
 ### 4 城市选择浮层-顶部搜索栏
+
+
 
 ### 5 城市选择浮层-城市的异步加载
 ### 6 城市选择浮层-渲染城市列表

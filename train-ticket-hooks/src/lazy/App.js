@@ -1,14 +1,13 @@
 import React, { Component, lazy, Suspense } from 'react';
-// import logo from './logo.svg';
-import './App.css';
+
 
 
 // 异步引入自定义webpack名字
 
-const About = lazy(() => import(/*webpackChunkName:'about'*/'./lazy/About.jsx'));
+const About = lazy(() => import(/*webpackChunkName:'about'*/'./About.jsx'));
 // 手动捕获错误方式 ErrorBoundary + componentDidCatch
 
-class App extends Component {
+class App1 extends Component {
     state = { hasError: false };
   // 捕获错误第一种
   // componentDidCatch() {
@@ -36,7 +35,7 @@ class App extends Component {
   }
 }
 
-export default App;
+export default App1;
 
 
 

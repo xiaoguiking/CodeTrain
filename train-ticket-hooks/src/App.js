@@ -1,15 +1,11 @@
 import React from 'react';
-import EffectHooks from './Hooks/EffectHooks';
+// import ContextHooks from './Hooks/ContextHooks';
+import App1 from './lazy/App';
 
 function App(){
   return (
-    <div><EffectHooks /></div>
+    <div><App1 /></div>
   )
 }
 
 export default App;
-
-
-
-
-
