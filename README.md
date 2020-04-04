@@ -64,7 +64,7 @@ react hooks
   - Supspense
   - memo
 
-### 01  Context实现跨层级的组件数据传递(包括多个Context)
+### 1  Context实现跨层级的组件数据传递(包括多个Context)
 
 **Context定义**
 Context 提供了一种方式，能够让数据在组件树中传递而不必一级一级手动传递(注意一定把把订阅的组件包裹在其中，才可以获取到值)
@@ -161,7 +161,7 @@ class Leaf extends Component {
 
 
 
-### 02  静态属性ContextType访问跨层级组件的数据
+### 2  静态属性ContextType访问跨层级组件的数据
 
 > 改造Leaf 组件使用静态属性
 
@@ -180,7 +180,7 @@ class Leaf extends Component {
 
 
 
-### 03  Lazy与Suspense实现延迟加载
+### 3  Lazy与Suspense实现延迟加载
 
 + 途径
   - Webpack - code splitting
@@ -517,3 +517,343 @@ export default App;
   ```
 
   
+
+##  第三章 ReactHooks  16.8
+
+###  1.React Hooks的概念与意义 
+
+**类组件不足**
+
+- 状态逻辑复用难
+  	-  缺少复用机制
+  	-  渲染属性和高阶组件导致层级冗余
+- 趋向复杂难以维护
+  - 生命周期函数不明确
+- this指向困扰
+  - 内联函数过渡创建新句柄
+  - 类成员函数不能保证this
+
+**Hooks优势**
+
+- 函数组件无this指向问题
+- 自定义hooks方便复用状态逻辑
+- 副作用的关注点分离
+
+### 2.使用State Hooks 
+
+**Class有状态组件**
+
+```js
+import React, {Component} from 'react';
+class StateHooks extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {  
+            count: 0
+        }
+    }
+    render() { 
+        const {count} = this.state;
+        return (  
+            <div>
+            <button onClick={() => this.setState({count: count + 1 })}>Click{count}</button>
+            </div>
+        );
+    }
+}
+```
+
+**函数式组件**
+
+- useState 需要按照固定的顺序被调用
+-  `useState()` 方法里面唯一的参数就是初始 state 
+-  **`useState` 方法的返回值是什么？** 返回值为：当前 state 以及更新 state 的函数 
+
+```js
+import React, { useState } from 'react'
+function StateHooks() {
+    const [count, setCount] = useState(0);
+    return (
+        <div>
+            <button onClick={() => setCount(count + 1)}>Click{count}</button>
+        </div>
+    )
+}
+```
+
+**函数式更新**
+
+```js
+function StateHooks(props) {
+    // 函数式更新
+    const [count, setCount] = useState(() => {
+        console.log('init');
+        return props.defaultValue || 0 ;
+    });
+    
+    return (
+        <div>
+            <button onClick={() => setCount(count + 1)}>Click{count}</button>
+        </div>
+    )
+}
+export default StateHooks;
+```
+
+
+
+###  3.使用Effect Hooks （对应了挂载  更新  ，卸载三个生命周期）
+
+**副作用**
+
+- 绑定事件
+- 网络请求
+- 访问DOM
+
+**副作用时机**
+
+- Mount之后
+- Udate之后
+- Unmount之前
+
+
+
+###  4.Context Hooks 
+
+### 5.使用Memo&Callback Hooks 
+
+###  6.使用Ref Hooks 	
+
+```js
+import React, { Component } from 'react';
+
+/**
+ * EffectHooks有状态案例
+ */
+
+class EffectHooks extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            count: 0,
+            size: {
+                height: document.documentElement.clientHeight,
+                width: document.documentElement.clientWidth,
+            }
+        }
+    }
+    // onResize函数 类属性
+    onResize = () => {
+        this.setState({
+            size: {
+                height: document.documentElement.clientHeight,
+                width: document.documentElement.clientWidth,
+            }
+        })
+    }
+    componentDidMount() {
+        document.title = this.state.count;
+        window.addEventListener('resize', this.onResize, false);
+    }
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.onResize, false);
+    }
+    componentDidUpdate() {
+        document.title = this.state.count;
+    }
+    render() {
+        const { count, size } = this.state
+        return (
+            <div>
+                <button onClick={() => this.setState({ count: count + 1 })}>
+                    Click: ({count})
+                Size: {size.height} X{size.width}
+                </button>
+            </div>
+        );
+    }
+}
+```
+
+
+
+```js
+/**
+ * 函数式EffectHooks
+ */
+
+const EffectHooks = () => {
+    const [count, setCount] = useState(0);
+    const [size, setResize] = useState({
+        height: document.documentElement.clientHeight,
+        width: document.documentElement.clientWidth,
+    })
+    useEffect(() => {
+        document.title = `You clicked ${count} times`;
+        console.log(document.title);
+    })
+
+    const onResize = () => {
+        setResize({
+            height: document.documentElement.clientHeight,
+            width: document.documentElement.clientWidth,
+        })
+    }
+    useEffect(() => {
+        window.addEventListener('resize', onResize, false)
+    })
+
+    useEffect(() => {
+        window.removeEventListener('resize', onResize, false);
+        return () => {
+            window.removeEventListener('resize', onResize, false);
+        }
+    }, [])
+
+    return (
+        <div>
+            <button onClick={() => { setCount(count + 1) }}>
+                Click: ({count})
+                size: {size.width} × {size.height}
+            </button>
+        </div>
+    )
+}
+
+```
+
+
+
+**追踪dom元素**
+
+```js
+const EffectHooks = () => {
+    const [count, setCount] = useState(0);
+    const [size, setResize] = useState({
+        height: document.documentElement.clientHeight,
+        width: document.documentElement.clientWidth,
+    })
+    useEffect(() => {
+        document.title = `You clicked ${count} times`;
+        console.log(document.title);
+    })
+
+    const onResize = () => {
+        setResize({
+            height: document.documentElement.clientHeight,
+            width: document.documentElement.clientWidth,
+        })
+    }
+    useEffect(() => {
+        window.addEventListener('resize', onResize, false)
+    })
+
+    useEffect(() => {
+        window.removeEventListener('resize', onResize, false);
+        return () => {
+            window.removeEventListener('resize', onResize, false);
+        }
+    }, [])
+
+    // 关于追踪dom元素
+    const onClick = () => {
+        console.log('dom');
+    }
+    useEffect(() => {
+        document.querySelector('#size').addEventListener('click', onClick, false);
+        return () => {
+            document.querySelector('#size').removeEventListener('click', onClick, false);
+        }
+    })
+    return (
+        <div>
+            <button onClick={() => { setCount(count + 1) }}>
+                Click: ({count})
+                size: {size.width} × {size.height}
+            </button>
+            {
+                count%2
+                ? <span id="size">size: {size.width} × {size.height}</span>:
+                <p id="size">size: {size.width} × {size.height}</p>
+            }
+        </div>
+    )
+}
+```
+
+
+
+### 7.自定义Hooks 
+
+###   8.Hooks的使用法则 
+
+### 9Hooks的常见问题 
+
+
+
+## 第四章 Redux
+
+###  React Redux的概念与意义 
+
+###  没有Redux的世界 
+
+###  Dispatch与Action 
+
+###  使用Reducer拆解数据更新 
+
+###   异步Action 
+
+
+
+##  第五章 渐进式Web App
+
+### PWA简介 
+
+###  服务工作线程：Service Worker 
+
+### 承诺”控制流：Promise 
+
+###  更优雅的请求：fetch 
+
+### 资源的缓存系统：Cache API 
+
+### 消息推送：Notification API 
+
+###  如何在项目中开启PWA 
+
+
+
+## 第六章项目重点火车票业务架构
+
+###  项目业务选型以及演示分析 
+
+###   项目模块交互设计演示与分析 
+
+###   项目工程初始化 
+
+###   为项目搭建Mock Server 
+
+
+
+## 第七章 项目火车篇首页
+
+### 1数据结构设计
+
+### 2顶部导航栏
+
+
+
+###  3始发终到站
+
+### 4 城市选择浮层-顶部搜索栏
+
+### 5 城市选择浮层-城市的异步加载
+### 6 城市选择浮层-渲染城市列表
+### 7 城市选择浮层-字母快速定位
+### 8 城市选择浮层-搜索建议
+### 9 出发日期控件
+### 10 日期选择浮层-搭建
+### 11 日期选择浮层-日历组件(上)
+### 12 日期选择浮层-日历组件(下)
+### 13 只看高铁&动车控件
+### 14 提交按钮控件
