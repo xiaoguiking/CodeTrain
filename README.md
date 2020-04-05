@@ -122,7 +122,7 @@ class App extends Component {
       <Middle />
        </OnlineContext.Provider>
       </BatteryContext.Provider>
-    );
+      );
     }
 }
 ```
@@ -184,10 +184,7 @@ class Leaf extends Component {
 
 + 途径
   - Webpack - code splitting
-  - import
-        ```js
-        import ('./about.js').then(code)
-        ```
+  - import（ import ('./about.js').then(code)）
 - 改写`App.js`
     ```js
     import React, { Component, lazy } from 'react';
@@ -215,27 +212,26 @@ import './App.css';
 - 建立一个About.jsx文件
     ```js
     import React, {Component} from 'react'
+    export default class About extends Component {
+    render() { 
+        return ( <h1>About</h1> );
+    	}
+    }
     ```
 
-```js
-export default class About extends Component {
-render() { 
-    return ( <h1>About</h1> );
-	}
-}
-```
+
 
 
 - Error
     ```js
     A React component suspended while rendering, but no fallback UI was specified
+    是因为Suspens组件里面需要加入对应的UI状态
     ```
 - 引入Suspense修改
     ```js
     // 异步引入自定义webpack名字
       const About = lazy(() => import(/*webpackChunkName:'about'*/'./About.jsx'));
-
-      class App extends Component {
+  class App extends Component {
         render() { 
           return ( 
             <div>
@@ -246,7 +242,7 @@ render() {
            );
         }
       }
-    ```
+  ```
 - 捕获加载错误
   ```js
   ErrorBoundary +  componentDidCatch
@@ -300,17 +296,18 @@ const About = lazy(() => import(/*webpackChunkName:'about'*/'./About.jsx'));
 
   ```js
 
-
-优化典型模板
+**优化典型模板**
+    
 import React, { Component } from 'react';
-// 父组件
+
+
 class Foo extends Component {
   render() {
     console.log('Foo render');
     return null;
   }
 }
-// 儿子组件
+
 class App extends Component {
   state = {
     count: 0
@@ -331,13 +328,13 @@ class App extends Component {
 export default App;
 
 
-性能问题：  父组件多次渲染
+性能问题：  Foo组件多次渲染
   ```
 
 - shouldComponentUpdate(nextProps, nextState)
 
   ```js
-  // 父组件
+  
   class Foo extends Component {
     shouldComponentUpdate(nextProps, nextState){
       if(nextProps.name === this.props.name){
@@ -378,14 +375,14 @@ export default App;
   ```js
   import React, { Component, PureComponent } from 'react';
   
-  // 父组件
+  
   class Foo extends PureComponent { // 只有Props第一级发生改变才会重新渲染
     render() {
       console.log('Foo render');
       return <div>{this.props.person.age}</div>;
     }
   }
-  // 儿子组件
+  
   class App extends Component {
     state = {
       count: 0,
@@ -422,7 +419,7 @@ export default App;
   ```js
   import React, { Component, PureComponent } from 'react';
   
-  // 父组件
+  
   class Foo extends PureComponent {
     render() {
       console.log('Foo render');
@@ -431,7 +428,7 @@ export default App;
   }
   
   
-  // 儿组件
+  
   class App extends Component {
     state = {
       count: 0,
@@ -474,7 +471,7 @@ export default App;
   ```js
   import React,{memo} from 'react';
   
-  // 父级无状态组件
+  // 无状态组件
   const Foo = memo(function Foo(props){
       console.log('Foo render');
       return (
@@ -482,7 +479,7 @@ export default App;
       )
   })
   
-  // 儿组件
+  // 
   class App extends Component {
     state = {
       count: 0,
@@ -493,7 +490,7 @@ export default App;
   
   // 解决回调
   callback = () => {
-      
+  	//other code  
   };
     render() {
       const person = this.state.person;
@@ -784,6 +781,7 @@ const EffectHooks = () => {
 import React, { Component, createContext, useState, useContext } from 'react'
 
 const CountContext = createContext();
+// 组件包裹形式
 class Foo extends Component {
     render() { 
         return ( 
@@ -910,9 +908,17 @@ export default ContextHooks;
 
 
 
-​		`src/index/index.js`
+`src/index/index.js`
 
-```
+**安装包**
+
+| yarn add normalize.css | 清除全局样式   |
+| ---------------------- | -------------- |
+| yarn add react-redux   |                |
+| yarn add  redux        | 全局状态管理   |
+| yarn add redux-thunk   | 处理异步action |
+
+```react
 import React from 'react';
 import ReactDom from 'react-dom';
 import {Provider} from 'react-redux';
@@ -922,10 +928,167 @@ import './index.css';
 import App from './App';
 
 ReactDom.render(
-    <Provider store={store}><App /></Provider>, 
-    document.getElementById('root')
-    );
+<Provider store={store}><App /></Provider>, 
+document.getElementById('root')
+);
+
 ```
+
+
+
+`src/index/index.css`
+
+```css
+html {
+    background: #f5f5f5;
+    color: #333;
+    font-size: 32px;
+}
+
+body,
+ul,
+ol,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+figure,
+form,
+fieldset,
+legend,
+input,
+textarea,
+button,
+p,
+blockquote,
+th,
+td,
+pre,
+xmp {
+    margin: 0;
+    padding: 0;
+}
+
+body,
+input,
+textarea,
+button,
+select,
+pre,
+tt,
+code,
+kbd,
+samp,
+optgroup,
+option {
+    line-height: 1.5;
+    font-family: arial, '\5B8B\4F53', '\5FAE\8F6F\96C5\9ED1', verdana, helvetica,
+        sans-serif;
+}
+
+body {
+    min-width: 320px;
+    max-width: 540px;
+    font-size: 16px;
+    margin: 0 auto;
+    padding-top: 44px;
+}
+
+.hidden,
+[hidden] {
+    display: none !important;
+}
+
+::-webkit-input-placeholder {
+    color: #c7ced4;
+}
+
+button {
+    -webkit-appearance: none;
+}
+
+```
+
+`src/index/App.jsx`
+
+```react
+import { connect } from 'react-redux';
+
+import './App.css';
+function App(props) {
+
+}
+
+export default connect(
+    function mapStateToProps(state) {},
+    function mapDispatchToProps(dispatch) {}
+)(App);
+```
+
+`src/index/reducers.js`
+
+```js
+export default {
+    
+}; 
+```
+
+`src/index/store.js`
+
+```react
+import {
+    createStore,
+    combineReducers,
+    applyMiddleware
+} from 'redux';
+import reducers from './reducers';
+import thunk from 'react-thunk';
+
+export  default createStore(
+	combineReducers(reducers),
+    {
+        // 初始值 state code
+    },
+    applyMiddlewart(thunk)
+)
+```
+
+
+
+**建立页面文件**
+
+- src/query/index.js  车次列表
+- src/ticket/index.js  选择车票
+- src/order/index.js   订单页
+- public/index.html  修改原本title 火车票
+- public/query.html    title 搜索结果
+- public/ticket.html     坐席选择
+- public/order.html   订单填写
+
+**修改webpack配置**
+
+- config/webpack.config.js
+
+- 搜索entry----定义在paths.js
+
+- 修改paths.js
+
+  ```js
+    appHtml: resolveApp('public/index.html'),
+    appQueryHtml: resolveApp('public/Query.html'),
+    appOrderHtml: resolveApp('public/Order.html'),
+    appTicketHtml: resolveApp('public/ticket.html'),
+    appIndexJs: resolveModule(resolveApp, 'src/index/index'),
+    appQueryJs: resolveModule(resolveApp, 'src/query/index'),
+    appTicketJs: resolveModule(resolveApp, 'src/ticket/index'),
+    appOrderJs: resolveModule(resolveApp, 'src/order/index'),
+  ```
+
+  
 
 
 

@@ -10,4 +10,4 @@ function App(props) {
 export default connect(
     function mapStateToProps(state) {},
     function mapDispatchToProps(dispatch) {}
-);
+)(App);
