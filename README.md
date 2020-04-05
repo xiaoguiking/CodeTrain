@@ -907,7 +907,7 @@ import React, { useState, useMemo, memo, useCallback } from 'react'
 const Counter = memo(function Counter(props) {
     console.log('Counter render');
     return (
-        <h1>{props.count}</h1>
+        <h1 onClick={props.onClick}>{props.count}</h1>
     )
 })
 
@@ -958,13 +958,149 @@ export default MemoHooks;
 
 ```
 
-
-
-
-
-
-
 ###  6.使用Ref Hooks 	
+
+| class        | Hooks                     |
+| ------------ | ------------------------- |
+| string Ref   | useRef                    |
+| Callback Ref | 获取子组件或者DOM节点句柄 |
+| CreateRef    | 渲染周期之间共享数据存储  |
+|              |                           |
+
+ `useRef` 返回一个可变的 ref 对象，其 `.current` 属性被初始化为传入的参数（`initialValue`）。返回的 ref 对象在组件的整个生命周期内保持不变。 
+
+- 获取子组件或者dom 节点
+
+  ```react
+  import React, { useState, useMemo, memo, useCallback, useRef, PureComponent } from 'react'
+  
+  
+  // const Counter = memo(function Counter(props) {
+  //     console.log('Counter render');
+  //     return (
+  //         <h1 onClick={props.onClick}>{props.count}</h1>
+  //     )
+  // })
+  
+  // 关键代码，需要使用类组件
+  class Counter extends PureComponent {
+      render(){
+          const {props} = this;
+          return (
+              <h1  onClick={props.onClick}>{props.count}</h1>
+          )
+      }
+  }
+  
+  const RefHooks = (props) => {
+      const [count, setCount] = useState(0);
+      const [clickCount, setClickCount] = useState(0);
+      const counterRef = useRef();
+  
+      // useMemo性能优化 返回一个值
+      const double = useMemo(() => {
+          return count * 2;
+      }, [count === 3])
+  
+  
+      // useCallback第二种  返回一个函数
+      const onClick = useCallback(() => {
+          console.log('click');
+          // setClickCount(clickCount + 1); //需要加入依赖 clickCount
+          setClickCount((clickCount) => clickCount + 1)
+          console.log(counterRef.current, 'current');
+      }, [counterRef.current])
+  
+      return (
+          <div>
+              <button onClick={() => { setCount(count + 1) }}>
+                  Click: {count}, double: {double} , {clickCount}
+              </button>
+              // 关键代码
+              <Counter count={double} onClick={onClick} ref={counterRef} />
+          </div>
+      )
+  }
+  
+  export default RefHooks;
+  
+  
+  打印： 
+  
+  RefHooks.js:36 Counter {props: {…}, context: {…}, refs: {…}, updater: {…}, _reactInternalFiber: FiberNode, …} "current"	
+  ```
+
+  - 渲染周期之间共享数据存储
+
+    场景描述： 组件挂载count 每秒 + 1 ，到 > = 10之后, 不再增加
+
+    使用 tmp.current 保存了 数据， 返回同一个 ref 对象 
+
+    ```react
+    import React, { useState, useMemo, memo, useCallback, useRef, PureComponent, useEffect } from 'react'
+    
+    
+    class Counter extends PureComponent {
+        speak() {
+            console.log(`you clicked ${this.props.count}`);
+        }
+        render(){
+            const {props} = this;
+            return (
+                <h1  onClick={props.onClick}>{props.count}</h1>
+            )
+        }
+    }
+    
+    const RefHooks = (props) => {
+        const [count, setCount] = useState(0);
+        const [clickCount, setClickCount] = useState(0);
+        const counterRef = useRef();
+        const tmp = useRef();
+        // useMemo性能优化 返回一个值
+        const double = useMemo(() => {
+            return count * 2;
+        }, [count === 3])
+    
+    
+        // useCallback第二种  返回一个函数
+        const onClick = useCallback(() => {
+            console.log('click');
+            // setClickCount(clickCount + 1); //需要加入依赖 clickCount
+            setClickCount((clickCount) => clickCount + 1)
+            console.log(counterRef.current, 'current');
+            counterRef.current.speak();
+        }, [counterRef.current])
+    
+        // 共享数据场景  关键代码
+        useEffect(() => {
+             tmp.current = setInterval(() => {
+                setCount((count) => count + 1);
+            }, 1000)
+        }, [])
+    
+        // > = 10 停止,变量此时已经改变,关键代码
+        useEffect(() => {
+            if(count >= 10){
+                clearInterval(tmp.current);
+            }  
+        })
+        return (
+            <div>
+                <button onClick={() => { setCount(count + 1) }}>
+                    Click: {count}, double: {double} , {clickCount}
+                </button>
+                <Counter count={double} onClick={onClick} ref={counterRef} />
+            </div>
+        )
+    }
+    
+    export default RefHooks;
+    ```
+
+    
+
+
 
 ### 7.自定义Hooks 
 

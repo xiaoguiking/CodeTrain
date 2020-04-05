@@ -1,11 +1,11 @@
 import React from 'react';
 // import App1 from './lazy/App';
-import CallbackHooks from './Hooks/CallbackHooks';
+import RefHooks from './Hooks/RefHooks';
 
 
 function App(){
   return (
-    <div><CallbackHooks /></div>
+    <div><RefHooks /></div>
   )
 }
 

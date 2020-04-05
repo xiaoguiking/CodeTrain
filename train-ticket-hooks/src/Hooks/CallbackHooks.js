@@ -5,7 +5,7 @@ import React, { useState, useMemo, memo, useCallback } from 'react'
 const Counter = memo(function Counter(props) {
     console.log('Counter render');
     return (
-        <h1>{props.count}</h1>
+        <h1 onClick={props.onClick}>{props.count}</h1>
     )
 })
 
@@ -47,7 +47,7 @@ const MemoHooks = () => {
             <button onClick={()=> {setCount(count + 1 )}}>
                 Click: {count}, double: {double} , {clickCount}
             </button>
-            <Counter count={double} onclick={onClick}/> 
+            <Counter count={double} onClick={onClick}/> 
         </div>
     )
 }
