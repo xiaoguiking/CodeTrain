@@ -1183,9 +1183,60 @@ const CustomHooks = () => {
 
 ###   8.Hooks的使用法则 
 
+- 在最顶层调用hooks模式
+
+- 函数组件或者自定义hooks中调用
+
+  
+
 ### 9.Hooks的常见问题 
 
+- 对传统React编程影响
 
+  - 声明周期如何映射到Hooks
+
+    ```react
+    constructor ---------------  useState
+    shouldComponentUpdate  ----  memo
+    componentDidMount componentWillUnmout   componentDidUpdate   useEffect 		
+    
+    ```
+
+   - 类实例成员变量如何映射到Hooks
+  
+   - Hooks中如何获取历史props和state
+  
+  ```react
+  function Couter(){
+      const[count, setCount] = useState(0);
+      const prevCountRef = useRef();
+      useEffect(() => {
+          prevCountRef.current = count;
+      });
+      const prevCount = prevCountRef.current;
+      return (<div>Now:{count} before: {prevent}</div>)
+  }
+  ```
+  
+  - 强制更新一个Hooks组件
+  
+    ```react
+    function Couter(){
+        const[count, setCount] = useState(0);
+        const [updater, setUpdater] = useState(0);
+        funtion forceUpdate() {
+            setUpdater((updater) => updater + 1 )
+        }
+        const prevCountRef = useRef();
+        useEffect(() => {
+            prevCountRef.current = count;
+        });
+        const prevCount = prevCountRef.current;
+        return (<div>Now:{count} before: {prevent}</div>)
+    }
+    ```
+  
+    
 
 ## 第四章 Redux
 
