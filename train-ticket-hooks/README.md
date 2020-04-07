@@ -1240,15 +1240,73 @@ const CustomHooks = () => {
 
 ## 第四章 Redux
 
-###  React Redux的概念与意义 
+###  1.React Redux的概念与意义 
 
-###  没有Redux的世界 
+> Redux体现的是可控，可依赖、可追溯的数据流管理（状态容器与数据流管理）
 
-###  Dispatch与Action 
+**Redux**
 
-###  使用Reducer拆解数据更新 
+- 单一数据源
+- 状态不可变
+- 纯函数修改状态
 
-###   异步Action 
+###  2.没有Redux的世界  TodoList
+
+ #### 构建视图
+
+- TodoList 全局展示
+- Todos 列表区 展示待办
+- Control 输入区
+
+```react
+import React，{useState, useEffect, useCallback, useRef, memo} from 'react';
+import './index.css';
+
+
+//输入区
+function Control (props) {
+   
+    return (
+        <div className="control">
+            Control
+        </div>
+    )
+}
+
+// 列表区 展示待办
+function Todos(props){
+    const { todos, removeTodo, toggleTodo } = props;
+
+    return (
+        <ul>
+           Todos
+        </ul>
+    )
+}
+
+// 全局展示
+const TodoList = () => {
+    const [todos, setTodos] = useState([]);
+    return (
+    	<div>
+        	<Control />
+            <Todos />
+        </div>
+    )
+}
+
+export default TodoList;
+```
+
+
+
+
+
+###  3.Dispatch与Action 
+
+###  4.使用Reducer拆解数据更新 
+
+###   5.异步Action 
 
 
 

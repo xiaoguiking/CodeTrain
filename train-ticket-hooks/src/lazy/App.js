@@ -6,8 +6,7 @@ import React, { Component, lazy, Suspense } from 'react';
 
 const About = lazy(() => import(/*webpackChunkName:'about'*/'./About.jsx'));
 // 手动捕获错误方式 ErrorBoundary + componentDidCatch
-
-class App1 extends Component {
+class App extends Component {
     state = { hasError: false };
   // 捕获错误第一种
   // componentDidCatch() {
@@ -17,7 +16,7 @@ class App1 extends Component {
   // }
 
   // 第二种捕获静态方法
-  static getDerivedStateFormError(error){
+  static getDerivedStateFormError(){
     return {
       hasError: true
     }
@@ -35,7 +34,7 @@ class App1 extends Component {
   }
 }
 
-export default App1;
+export default App;
 
 
 
