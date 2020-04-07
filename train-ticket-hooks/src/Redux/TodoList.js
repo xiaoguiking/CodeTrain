@@ -5,7 +5,7 @@ import './index.css';
 let idSeq = Date.now();
 // 输入区
 const Control = memo(function Control (props) {
-    const { addTodo } = props;
+    const { dispatch } = props;
     const inputRef = useRef();
 
     const onSubmit = (e) => {
@@ -16,11 +16,14 @@ const Control = memo(function Control (props) {
             return;
         }
         // 非空创建新的todo
-        addTodo({
-            id: ++idSeq,
-            text: newText,
-            complete: false,
-        }) 
+        dispatch({
+            type: 'add',
+            payload: {
+                id: ++idSeq,
+                text: newText,
+                complete: false,
+            }
+        })
         inputRef.current.value = '';
     }
     return (
@@ -46,16 +49,15 @@ const TodoItem = memo(function TodoItem(props) {
             text,
             complete
         },
-        toggleTodo,
-        removeTodo,
+        dispatch
     } = props;
 
     const onChange = () => {
-        toggleTodo(id);
+        dispatch({type:'toggle', payload: id})
     }
 
     const onRemove = () => {
-        removeTodo(id);
+        dispatch({type: 'remove', payload: id});
     }
 
     return (
@@ -74,7 +76,7 @@ const TodoItem = memo(function TodoItem(props) {
 
 // 列表区 展示待办
 const Todos = memo(function Todos(props){
-    const { todos, removeTodo, toggleTodo } = props;
+    const { todos, dispatch } = props;
 
     return (
         <ul>
@@ -83,8 +85,7 @@ const Todos = memo(function Todos(props){
                     return ( 
                         <TodoItem 
                             todo={todo}
-                            toggleTodo={toggleTodo}
-                            removeTodo={removeTodo}
+                            dispatch={dispatch}
                             key={todo.id}
                         />)
                 })
@@ -98,36 +99,45 @@ const LS_KEY = '$todos';
 const TodoList =  ()  =>  {
     const [todos, setTodos] = useState([]);
 
-    // 需要传递到子组件优化性能 useCallback包裹
-    // 添加todo
-    const addTodo = useCallback(todo => {
-        setTodos(todos => [...todos, todo])
-    }, []);
+    // dispatch功能 统一更新数据
+    const dispatch = useCallback(action => {
+        const {type, payload} = action;
+        switch (type) {
+            case 'set':
+                // 新数组
+                setTodos(payload);
+                break;
+            case 'add':
+                // 新对象
+                setTodos(todos => [...todos, payload])
+                break;
+            case 'remove':
+                // 新id
+                setTodos(todos => todos.filter(todo => {
+                    return todo.id !== payload;
+                }));
+                break;
+            case 'toggle':
+                 setTodos(todos => todos.map(todo => {
+                     return todo.id === payload
+                     ? {
+                         ...todo,
+                        complete: !todo.complete,
+                     }:
+                     todo;
+                 }))
+                break;
+            default:
+                
+        }
+    },[]);   
 
-    // 删除todo
-    const removeTodo = useCallback(id => {
-       setTodos(todos => todos.filter(todo => {
-           return todo.id !== id;
-       }))
-    },[]);
-
-    // 切换待办状态
-    const toggleTodo = useCallback(id => {
-        setTodos(todos => todos.map(todo => {
-            return todo.id === id
-            ? {
-                ...todo,
-                complete: !todo.complete
-            } 
-            : todo;
-        }))
-    }, []);
 
     // 通过localStorage实现起始上次数据便显示出来
     useEffect(() => {
         const todos = JSON.parse(localStorage.getItem(LS_KEY || '[]'));
-        setTodos(todos);
-     },[])
+        dispatch({type: 'set', payload: todos});
+     },[dispatch])
 
     // 通过localStorage保存数据
     useEffect(() => {
@@ -137,10 +147,9 @@ const TodoList =  ()  =>  {
 
     return (
         <div className="todo-list">
-            <Control addTodo={addTodo} />
+            <Control dispatch={dispatch} />
             <Todos 
-                removeTodo={removeTodo} 
-                toggleTodo={toggleTodo} 
+                dispatch={dispatch} 
                 todos={todos}
             />
         </div>

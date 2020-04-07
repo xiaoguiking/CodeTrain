@@ -1,7 +1,7 @@
 import React from 'react';
 // import App1 from './lazy/App';
 // import CustomHooks01 from './Hooks/CustomHook01';
-import TodoList from './Redux';
+import TodoList from './Redux/TodoList';
 
 
 function App(){
