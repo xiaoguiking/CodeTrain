@@ -1782,9 +1782,19 @@ export function createToggle(payload) {
 
 #### 第三次改写
 
-###  4.使用Reducer拆解数据更新 
+###  4.使用Reducer拆解数据更新  bug
 
-###   5.异步Action 
+`Redux/reducer.js`
+
+````react
+
+````
+
+
+
+
+
+###   5.异步Action  bug
 
 
 
