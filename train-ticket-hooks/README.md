@@ -315,8 +315,6 @@ export  default createStore(
    
   ```
 
-  
-
 - 搜索entry----定义在paths.js
 
 - 修改paths.js
@@ -335,10 +333,12 @@ export  default createStore(
 - 打包 yarn build 查看
 
 
-
 ###   4.为项目搭建Mock Server 
 
+`CodeTranin/train-mock`
 
+- npm init - y
+- touch index.js
 
 ## 第七章 项目火车篇首页
 
@@ -368,3 +368,7 @@ export  default createStore(
 ### 12 日期选择浮层-日历组件(下)
 ### 13 只看高铁&动车控件
 ### 14 提交按钮控件
+
+
+
+   
