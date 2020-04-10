@@ -54,6 +54,7 @@ module.exports = {
   appPath: resolveApp('.'),
   appBuild: resolveApp('build'),
   appPublic: resolveApp('public'),
+  //  多个应用配置 start
   appHtml: resolveApp('public/index.html'),
   appQueryHtml: resolveApp('public/query.html'),
   appOrderHtml: resolveApp('public/order.html'),
@@ -62,6 +63,7 @@ module.exports = {
   appQueryJs: resolveModule(resolveApp, 'src/query/index'),
   appTicketJs: resolveModule(resolveApp, 'src/ticket/index'),
   appOrderJs: resolveModule(resolveApp, 'src/order/index'),
+  // 多个应用配置
   appPackageJson: resolveApp('package.json'),
   appSrc: resolveApp('src'),
   appTsConfig: resolveApp('tsconfig.json'),

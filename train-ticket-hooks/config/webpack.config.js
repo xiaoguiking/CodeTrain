@@ -139,28 +139,19 @@ module.exports = function(webpackEnv) {
       : isEnvDevelopment && 'cheap-module-source-map',
     // These are the "entry points" to our application.
     // This means they will be the "root" imports that are included in JS bundle.
-    entry: {
-      index: [
-          paths.appIndexJs,
-          isEnvDevelopment &&
-              require.resolve('react-dev-utils/webpackHotDevClient'),
-      ].filter(Boolean),
-      query: [
-          paths.appQueryJs,
-          isEnvDevelopment &&
-              require.resolve('react-dev-utils/webpackHotDevClient'),
-      ].filter(Boolean),
-      ticket: [
-          paths.appTicketJs,
-          isEnvDevelopment &&
-              require.resolve('react-dev-utils/webpackHotDevClient'),
-      ].filter(Boolean),
-      order: [
-          paths.appOrderJs,
-          isEnvDevelopment &&
-              require.resolve('react-dev-utils/webpackHotDevClient'),
-      ].filter(Boolean),
+   // entry修改配置 start
+   entry :{
+    // index:[paths.appIndexJs,isEnvDevelopment &&require.resolve('react-dev-utils/webpackHotDevClient')].filter(Boolean),
+    // order:[paths.appOrderJs,isEnvDevelopment &&require.resolve('react-dev-utils/webpackHotDevClient')].filter(Boolean),
+    // ticket:[paths.appTicketJs,isEnvDevelopment &&require.resolve('react-dev-utils/webpackHotDevClient')].filter(Boolean),
+    // query:[paths.appQueryJs,isEnvDevelopment &&require.resolve('react-dev-utils/webpackHotDevClient')].filter(Boolean)
+    index:[paths.appIndexJs,],
+    order:[paths.appOrderJs,],
+    ticket:[paths.appTicketJs],
+    query:[paths.appQueryJs]
   },
+  // entry修改配置 end
+  // output start
     output: {
       // The build folder.
       path: isEnvProduction ? paths.appBuild : undefined,
@@ -170,7 +161,7 @@ module.exports = function(webpackEnv) {
       // In development, it does not produce real files.
       filename: isEnvProduction
         ? 'static/js/[name].[contenthash:8].js'
-        : isEnvDevelopment && 'static/js/bundle.js',
+        : isEnvDevelopment && 'static/js/[name].js', //这一行需要修改
       // TODO: remove this when upgrading to webpack 5
       futureEmitAssets: true,
       // There are also additional JS chunk files if you use code splitting.
@@ -518,8 +509,8 @@ module.exports = function(webpackEnv) {
           {
             inject: true,
             template: paths.appHtml,
-            fileName: 'index.html',
-            chunks: ['index']
+            fileName: 'index.html',// HTML文件
+            chunks: ['index'] // 需要进入js文件名文件
           },
           isEnvProduction
             ? {

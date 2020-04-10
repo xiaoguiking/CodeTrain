@@ -15,7 +15,7 @@
 - 改写webpackconfig编译多个页面
 
 + src下创建 mkdir index
-  - touch action.js
+  - touch actions.js
   - touch App.css
   - touch App.jsx
   - touch index.css
@@ -311,8 +311,6 @@ export  default createStore(
           )
         ),
           
-          
-   
   ```
 
 - 搜索entry----定义在paths.js
@@ -339,6 +337,34 @@ export  default createStore(
 
 - npm init - y
 - touch index.js
+   ```js
+   const express = require('express');
+
+const app = express();
+
+app.get('/', (request, response) => {
+    response.status(200);
+    response.send('hello');
+    response.end();
+});
+
+app.get('/rest', (request, response) => {
+    response.json({
+        result: 1,
+        msg: 'hello world'
+    })
+});
+
+app.listen(5000, () => {console.log('express port is 5000')});
+   ```
+`train-ticket-hooks/package.json`
+```js
+"proxy": "http://localhost:5000"
+```
+- 控制台`fetch('/rest')`
+    ```
+    查看Network
+    ```
 
 ## 第七章 项目火车篇首页
 
