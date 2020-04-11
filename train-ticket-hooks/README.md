@@ -783,7 +783,144 @@ import React from 'react'
 
 ### 2顶部导航栏
 
+- 动态校验传入的类型
 
+  ```react
+  yarn add prop-types
+  ```
+
+- components/Header.jsx 
+	```react
+	import React from 'react'
+	import PropTypes from 'prop-types';
+	import './Header.css';
+	
+	export default function Header(props) {
+	    const { onBack, title } = props;
+	    console.log(onBack, 'on');
+	    return (
+	        <div className="header">
+	            <div className="header-back" onClick={onBack}>
+	                 <svg width="42" height="42">
+	                    <polyline 
+	                        points="25, 13, 16, 21, 25, 29"
+	                        stroke="#fff"
+	                        strokeWidth="2"
+	                        fill="none"
+	                    />
+	                 </svg>
+	            </div>
+	            <h1 className="header-title">
+	                {title}
+	            </h1>
+	        </div>
+	    )
+	}
+	
+	Header.protoTypes = {
+	    onBack: PropTypes.func.isRequired,
+	    title: PropTypes.string.isRequired,
+	}
+	```
+
+- Header.css
+
+  ```css
+  .header {
+      height: 44px;
+      line-height: 44px;
+      min-width: 240px;
+      background: #1ba9ba;
+      color: #fff;
+      font-size: 18px;
+      text-align: center;
+      position: relative;
+      padding: 0 15px;
+  }
+  
+  .header-back {
+      position: absolute;
+      left: 0;
+      width: 42px;
+      height: 42px;
+  }
+  .header-title {
+      max-width: 216px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline-block;
+      font-size: 100%;
+      margin: 0;
+  }
+  ```
+
+  
+
+- pages/Home/index.js
+
+  ```react
+  import React, {useCallback} from 'react';
+  import { renderRoutes } from "react-router-config";
+  import { connect } from 'react-redux';
+  import './index.css';
+  import Header from '../../components/Header';
+  import DepartDate from './DepartDate.jsx';
+  import HighSpeed from './HighSpeed.jsx';
+  import Journey from './Journey.jsx';
+  import Submit from './Submit.jsx';
+  
+  
+  function Home (props) {
+    const { route } = props;
+  
+   // 子组件传函数
+    const onBack = useCallback(() => {
+      window.history.back();
+    }, []);
+  
+    return (
+      <div>
+        <div>
+          <div className="header-wrapper">
+          <Header title="火车票" onBack={onBack}/>
+          </div>
+        <DepartDate />
+        <HighSpeed />
+        <Journey />
+        <Submit />
+        </div>
+        { renderRoutes (route.routes) }
+      </div>
+    )
+  }
+  
+  // export default React.memo (connect 
+  //   (mapStateToProps, mapDispatchToProps, mergeProps)
+  // (component)(Home));
+  export default React.memo(connect(
+    function mapStateToProps(state) {
+      return {}
+    },
+    function mapDispatchToProps(dispatch) {
+      return {}
+    }
+  )(Home));
+  ```
+
+- pages/Home.index.css
+
+  ```css
+  .header-wrapper {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      z-index: 2;
+  }
+  ```
+
+  
 
 ###  3始发终到站
 
