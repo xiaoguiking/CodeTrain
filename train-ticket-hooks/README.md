@@ -924,6 +924,151 @@ import React from 'react'
 
 ###  3始发终到站
 
+- src/pages/Home.js
+
+```react
+import React, { useCallback } from 'react';
+import { renderRoutes } from "react-router-config";
+import { connect } from 'react-redux';
+import './index.css';
+import Header from '../../components/Header';
+import DepartDate from './DepartDate.jsx';
+import HighSpeed from './HighSpeed.jsx';
+import Journey from './Journey.jsx';
+import Submit from './Submit.jsx';
+
+import {
+  exchangeFromTo,
+  showCitySelector
+} from '../../store/actions';
+
+function Home(props) {
+  const { route, from, to, dispatch } = props;
+
+  console.log(props, 'props');
+  // 子组件传函数
+  const onBack = useCallback(() => {
+    window.history.back();
+  }, []);
+
+  const doExchangeFromTo = useCallback(() => {
+    dispatch(exchangeFromTo());
+  },[dispatch])
+
+  const doShowCitySelector = useCallback((m) => {
+    dispatch(showCitySelector(m))
+  },[dispatch])
+
+
+  return (
+    <div>
+      <div>
+        <div className="header-wrapper">
+          <Header title="火车票" onBack={onBack} />
+        </div>
+        <Journey
+          from={from}
+          to={to}
+          exchangeFromTo={doExchangeFromTo}
+          showCitySelector={doShowCitySelector}
+        />
+        <DepartDate />
+        <HighSpeed />
+        <Submit />
+      </div>
+      {renderRoutes(route.routes)}
+    </div>
+  )
+}
+
+export default React.memo(connect(
+  function mapStateToProps(state) {
+    return state;
+  },
+  function mapDispatchToProps(dispatch) {
+    return {dispatch};
+  }
+)(Home));
+```
+
+合并改写
+
+```react
+import React, { useCallback, useMemo } from 'react';
+import { renderRoutes } from "react-router-config";
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import './index.css';
+import Header from '../../components/Header';
+import DepartDate from './DepartDate.jsx';
+import HighSpeed from './HighSpeed.jsx';
+import Journey from './Journey.jsx';
+import Submit from './Submit.jsx';
+
+import {
+  exchangeFromTo,
+  showCitySelector
+} from '../../store/actions';
+
+function Home(props) {
+  const { route, from, to, dispatch } = props;
+
+  console.log(props, 'props');
+  // 子组件传函数
+  const onBack = useCallback(() => {
+    window.history.back();
+  }, []);
+
+  // const doExchangeFromTo = useCallback(() => {
+  //   dispatch(exchangeFromTo());
+  // },[dispatch])
+
+  // const doShowCitySelector = useCallback((m) => {
+  //   dispatch(showCitySelector(m))
+  // },[dispatch])
+  
+  /**
+   * 合并回调cbs
+   * 关键代码
+   */
+  const cbs = useMemo(() => {
+    return bindActionCreators({
+      exchangeFromTo,
+      showCitySelector
+    }, dispatch)
+    },[dispatch])
+
+  return (
+    <div>
+      <div>
+        <div className="header-wrapper">
+          <Header title="火车票" onBack={onBack} />
+        </div>
+        <Journey
+          from={from}
+          to={to}
+          {...cbs }       // 关键代码
+        />
+        <DepartDate />
+        <HighSpeed />
+        <Submit />
+      </div>
+      {renderRoutes(route.routes)}
+    </div>
+  )
+}
+
+
+export default React.memo(connect(
+  function mapStateToProps(state) {
+    return state;
+  },
+  function mapDispatchToProps(dispatch) {
+    return {dispatch};
+  }
+)(Home));
+```
+
 
 
 ### 4 城市选择浮层-顶部搜索栏
