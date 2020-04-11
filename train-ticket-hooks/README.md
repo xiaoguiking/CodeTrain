@@ -1,5 +1,13 @@
 
 
+[TOC]
+
+
+
+
+
+
+
 ## 第六章项目重点火车票业务架构(video)
 
 ###  1.项目业务选型以及演示分析 
@@ -331,7 +339,7 @@ export  default createStore(
 - 打包 yarn build 查看
 
 
-###   4.为项目搭建Mock Server 
+### 4.为项目搭建Mock Server 
 
 `CodeTranin/train-mock`
 
@@ -339,37 +347,438 @@ export  default createStore(
 - touch index.js
    ```js
    const express = require('express');
-
-const app = express();
-
-app.get('/', (request, response) => {
-    response.status(200);
-    response.send('hello');
-    response.end();
-});
-
-app.get('/rest', (request, response) => {
-    response.json({
-        result: 1,
-        msg: 'hello world'
-    })
-});
-
-app.listen(5000, () => {console.log('express port is 5000')});
+   const app = express();
+   
+   app.get('/', (request, response) => {
+       response.status(200);
+       response.send('hello');
+       response.end();
+   });
+   
+   app.get('/rest', (request, response) => {
+       response.json({
+           result: 1,
+           msg: 'hello world'
+       })
+   });
+   
+   app.listen(5000, () => {console.log('express port is 5000')});
    ```
+
+   ```js
 `train-ticket-hooks/package.json`
-```js
+​```js
 "proxy": "http://localhost:5000"
-```
+   ```
 - 控制台`fetch('/rest')`
     ```
     查看Network
     ```
 
+### 5.code-train项目改造通过路由单页面应用
+
+- 安装路由
+    ```js
+    yarn add react-router react-router-dom react-router
+    ```
+    
+- `src/index.index`
+  
+  ```
+  安装 yarn add normalize.css
+  import 'normalize.css/';  // 清除浏览器全局样式
+  ```
+  
+- 编写路由`src/routes/index.js`
+   ```react
+import React from 'react'
+   import { Redirect } from 'react-router-dom';
+   import Home from '../pages/Home';
+   import Order from '../pages/order';
+   import Query from '../pages/query';
+   import Ticket from '../pages/ticket';
+   
+   export default [
+       {
+           path: "/",
+           component: Home,
+           routes: [
+               {
+                   path: "/",
+                   exact: true,
+                   render: () => (
+                       <Redirect to={"/home"} />
+                   ),
+               },
+               {
+                   path: "/order",
+                   component: Order
+               },
+               {
+                   path: '/ticket',
+                   component: Ticket
+               },
+               {
+                   path: "/query",
+                   component: Query
+               }
+           ]
+       },
+   ]
+   ```
+   
+- 配置状态管理`src/store/index.js` `src/store/actions.js` `src/store/reducers.js`
+
+   yarn add normalize.css  清除全局样式 
+
+    yarn add react-redux    
+
+   yarn add  redux  全局状态管理  
+
+   yarn add redux-thunk  处理异步action
+
+   ```react
+   // 仓库 store
+   import {
+       createStore,
+       combineReducers,
+       applyMiddleware
+   } from 'redux';
+   
+   import reducers from  './reducers';
+   import thunk from 'redux-thunk';
+   
+   export default createStore(
+       combineReducers(reducers),
+       {
+           // 初始值state
+       },
+       applyMiddleware(thunk)
+   )
+   
+   ```
+
+   
+
+### 目录结构
+
+- src
+
+  - asset 存放资源
+  - components 组件
+- routes 路由配置
+  - store 全局仓库
+
+
+
 ## 第七章 项目火车篇首页
 
 ### 1数据结构设计
 
+- React 视觉组件拆分
+
+- redux store状态涉及`src/store/index.js`
+
+  ```react
+  /**
+   * store仓库
+   */
+  import {
+      createStore,
+      combineReducers,
+      applyMiddleware
+  } from 'redux';
+  
+  import reducers from  './reducers';
+  import thunk from 'redux-thunk';
+  
+  export default createStore(
+      combineReducers(reducers),
+      {
+          // 初始值state
+          from: '北京',
+          to: '上海',
+          // 打开城市选择浮层
+          isCitySelectorVisible: false,
+          currentSelectingLeftCity: false,
+          // 所有城市数据 异步按需加载
+          cityData: null,
+          // 当前正在加载城市数据
+          isLoadingCityData: false,
+          // 日期选择浮层开关
+          isDateSelectorVisible: false,
+          // 高特动车
+          highSpeed: false, 
+          departDate: Date.now(),  
+      },
+      applyMiddleware(thunk)
+  )
+  ```
+
+  
+
+- redux action/reducer
+
+  ```react
+  /src/store/reducers.js
+  /**
+   * reducers 返回一个新的state
+   */
+  
+  import {
+      ACTION_SET_fROM,
+      ACTION_SET_TO,
+      // 打开城市选择浮层
+      ACTION_SET_IS_CITY_SELECTOR_VISIBLE,
+      ACTION_SET_CURRENT_SELECTING_LEFT_CITY,
+      // 所有城市数据 异步按需加载
+      ACTION_SET_CITY_DATA,
+      // 当前正在加载城市数据'
+      ACTION_SET_IS_LOADING_CITY_DATA,
+      // 日期选择浮层开关
+      ACTION_SET_IS_DATE_SELECTOR_VISIBLE,
+      // 高特动车
+      ACTION_SET_HIGH_SPEED,
+      ACTION_SET_DEPART_DATE,
+  } from './actions';
+  
+  export default {
+      // 初始值state
+      from(state = '北京', action) {
+          const { type, payload } = action;
+          switch (type) {
+              case ACTION_SET_fROM:
+                  return payload;
+              default:
+          }
+          return state;
+      },
+      to(state = '上海', action) {
+          const { type, payload } = action;
+          switch (type) {
+              case ACTION_SET_TO:
+                  return payload;
+              default:
+          }
+          return state;
+      },
+      // 打开城市选择浮层
+      isCitySelectorVisible(state = false, action) {
+          const { type, payload } = action;
+          switch (type) {
+              case ACTION_SET_IS_CITY_SELECTOR_VISIBLE:
+                  return payload;
+              default:
+          }
+          return state;
+      },
+      currentSelectingLeftCity(state = false, action) {
+          const { type, payload } = action;
+          switch (type) {
+              case ACTION_SET_CURRENT_SELECTING_LEFT_CITY:
+                  return payload;
+              default:
+          }
+          return state;
+      },
+      // 所有城市数据 异步按需加载
+      cityData(state = null, action) {
+          const { type, payload } = action;
+          switch (type) {
+              case ACTION_SET_CITY_DATA:
+                  return payload;
+              default:
+          }
+          return state;
+      },
+      // 当前正在加载城市数据
+      isLoadingCityData(state = false, action) {
+          const { type, payload } = action;
+          switch (type) {
+              case ACTION_SET_IS_LOADING_CITY_DATA:
+                  return payload;
+              default:
+          }
+          return state;
+      },
+      // 日期选择浮层开关
+      isDateSelectorVisible(state = false, action) {
+          const { type, payload } = action;
+          switch (type) {
+              case ACTION_SET_IS_DATE_SELECTOR_VISIBLE:
+                  return payload;
+              default:
+          }
+          return state;
+      },
+      // 高特动车
+      highSpeed(state false, action) {
+          const { type, payload } = action;
+          switch (type) {
+              case ACTION_SET_HIGH_SPEED:
+                  return payload;
+              default:
+          }
+          return state;
+      },
+      departDate(state = Date.now(), action) {
+          const { type, payload } = action;
+          switch (type) {
+              case ACTION_SET_DEPART_DATE:
+                  return payload;
+              default:
+          }
+  
+          return state;
+      },
+  };
+  ```
+
+  ```react
+  /**
+   * actions工厂
+   */
+  export const ACTION_SET_fROM= 'SET_FROM';
+  export const ACTION_SET_TO= 'SET_TO';
+  // 打开城市选择浮层
+  export const ACTION_SET_IS_CITY_SELECTOR_VISIBLE= 'SET_IS_CITY_SELECTOR_VISIBLE';
+  export const ACTION_SET_CURRENT_SELECTING_LEFT_CITY= 'SET_CURRENT_SELECTING_LEFT_CITY';
+  // 所有城市数据 异步按需加载
+  export const ACTION_SET_CITY_DATA= 'SET_CITY_DATA';
+  // 当前正在加载城市数据'
+  export const ACTION_SET_IS_LOADING_CITY_DATA= 'SET_IS_LOADING_CITY_DATA';
+  // 日期选择浮层开关
+  export const ACTION_SET_IS_DATE_SELECTOR_VISIBLE= 'SET_IS_DATE_SELECTOR_VISIBLE';
+  // 高特动车
+  export const ACTION_SET_HIGH_SPEED= 'SET_HIGH_SPEED';
+  export const ACTION_SET_DEPART_DATE = 'SET_DEPART_DATE';
+  
+  export function setFrom(from) {
+      return {
+          type: ACTION_SET_fROM,
+          payload: from
+      };
+  }
+  
+  export function setTo(to) {
+      return {
+          type: ACTION_SET_TO,
+          payload: to
+      };
+  }
+  
+  
+  export function setIsLoadingCityData(isLoadingCityData) {
+      return {
+          type: ACTION_SET_IS_LOADING_CITY_DATA,
+          payload: isLoadingCityData
+      }
+  }
+  
+  export function setCityData(cityDate) {
+      return {
+          type: ACTION_SET_CITY_DATA,
+          payload: cityDate
+      }
+  }
+  
+  export function toggleHighSpeed() {
+      return (dispatch, getState) => {
+          const { highSpeed } = getState;
+          dispatch({
+              type: ACTION_SET_HIGH_SPEED,
+              payload: !highSpeed
+          })
+      }
+  }
+  
+  // 异步action 城市选择
+  export function showCitySelector(currentSelectingLeftCity) {
+      return (dispatch) => {
+          dispatch({
+              type: ACTION_SET_IS_DATE_SELECTOR_VISIBLE,
+              payload: true
+          });
+          dispatch({
+              type:  ACTION_SET_CURRENT_SELECTING_LEFT_CITY,
+              payload: currentSelectingLeftCity
+          })
+      }
+  }
+  
+  export function hideCitySelector() {
+      return {
+          type: ACTION_SET_IS_CITY_SELECTOR_VISIBLE,
+          payload: false,
+      }
+  }
+  
+  // 封装始发逻辑 异步action
+  export function setSelectorCity(city) {
+      return (dispatch ,getState) => {
+          const {currentSelectingLeftCity} = getState();
+          if(currentSelectingLeftCity) {
+              dispatch(setFrom(city));
+          } else {
+              dispatch(setTo(city));
+          }
+      }
+  }
+  
+  // 日期选择浮层
+  export function showDateSelector() {
+      return {
+          type: ACTION_SET_IS_DATE_SELECTOR_VISIBLE,
+          payload: true,
+      }
+  }
+  
+  export function hideDateSelector() {
+      return {
+          type: ACTION_SET_IS_DATE_SELECTOR_VISIBLE,
+          payload: false,
+      }
+  }
+  
+  // 始发站和终点站可以互换
+  export function exchangeFromTo() {
+      return (dispatch, getState) => {
+          const { from, to} = getState();
+          dispatch(setFrom(to));
+          dispatch(setTo(from))
+      }
+  }
+  
+  export function setDepartDate(departDate) {
+      return {
+          type: ACTION_SET_DEPART_DATE,
+          payload: departDate,
+      };
+  }
+  ```
+
+  
+
+`公共组件components`
+
+- Header.jsx
+
+  ```react
+  import React from 'react'
+  import './Header.css';
+  
+  export default function Header() {
+      return (
+          <div>Header</div>
+      )
+  }
+  ```
+
+  
+
+- Header.css
+
+  
 
 
 ### 2顶部导航栏

@@ -1,26 +1,26 @@
 import React from 'react';
-import logo from './logo.svg';
+import { renderRoutes } from 'react-router-config';
+import {connect} from 'react-redux';
+import routes from './routes/index';
+import {HashRouter} from 'react-router-dom';
 import './App.css';
 
-function App() {
+function App () {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <HashRouter>
+      { renderRoutes (routes) }
+    </HashRouter>
+  )
 }
 
-export default App;
+export default connect(
+   function mapStateToProps (state, ownProps) {
+    return {
+    }
+  },
+  function  mapDispatchToProps (dispatch, ownProps)  {
+    return {
+     
+    }
+  }
+)(App);
