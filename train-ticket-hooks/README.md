@@ -1091,6 +1091,12 @@ export default React.memo(connect(
 
 `src/components/CitySelector.jsx`
 
+- 搜索功能
+
+- 回退功能
+
+  
+
 ```react
 /**
  * 城市选择浮层 
@@ -1118,11 +1124,229 @@ export default function CitySelector(props) {
 
 > yarn add  classnames
 
+```react
+/**
+ * 城市选择浮层 
+ * 1搜索框
+ * 2.回退功能
+ */
+import React, { useState } from 'react';
+import './CitySelector.css';
+import classnames from 'classnames';
+
+export default function CitySelector(props) {
+    const { show, isLoading, cityData, onBack1,} = props;
+    // console.log('CitySelector', props);
+    // console.log('onback', onBack);
+    // 动态处理css类名
+
+    // 保存搜索的内容
+    const [searchKey, setSearchKey] = useState('');
+	
+    // 处理留白
+    const key = useMemo(() => searchKey.trim, [searchKey]);
+    return (
+        <div className={classnames('city-selector', { hidden: !show})}>
+            <div className="city-search">
+                 <div className="search-back" onClick={() => onBack1()}>
+                        <svg width="42" height="42">
+                            <polyline
+                                points="25, 13, 16, 21, 25, 29"
+                                stroke="#fff"
+                                strokeWidth="2"
+                                fill="none"
+                            />
+                        </svg>
+                 </div>
+            <div className="search-input-wrapper">
+                <input 
+                    type="text"
+                    value={searchKey}
+                    className="search-input"
+                    placeholder="城市、车站的中文或拼音"
+                    onChange={(e) => setSearchKey(e.target.value)}
+                />
+            </div>
+            <i 
+                className={classnames("search-clean", {hidden: key.length === 0}) }
+                onClick={() => setSearchKey('')}
+            >
+                &#xf063;
+            </i>
+            </div>
+        </div>
+    )
+}
+```
+
+`src/Home/index.js`
+
+```react
+import React, { useCallback, useMemo } from 'react';
+import { renderRoutes } from "react-router-config";
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import './index.css';
+import Header from '../../components/Header';
+import DepartDate from './DepartDate.jsx';
+import HighSpeed from './HighSpeed.jsx';
+import Journey from './Journey.jsx';
+import Submit from './Submit.jsx';
+import CitySelector from '../../components/CitySelector';
+
+import {
+  exchangeFromTo,
+  showCitySelector,
+  hideCitySelector,
+} from '../../store/actions';
+
+function Home(props) {
+  const { route, from, to, dispatch, 
+    cityData, isLoadingCityData, isDateSelectorVisible,
+    isCitySelectorVisible,
+} = props;
+
+  console.log(props, 'props');
+
+  // 子组件传函数
+  const onBack = useCallback(() => {
+    window.history.back();
+  }, []);
+
+  // const doExchangeFromTo = useCallback(() => {
+  //   dispatch(exchangeFromTo());
+  // },[dispatch])
+
+  // const doShowCitySelector = useCallback((m) => {
+  //   dispatch(showCitySelector(m))
+  // },[dispatch])
+
+  /**
+   * 合并回调cbs
+   * 关键代码
+   */
+  const cbs = useMemo(() => {
+    return bindActionCreators({
+      exchangeFromTo,
+      showCitySelector
+    }, dispatch)
+  }, [dispatch])
+
+  /**
+   * 跳转到CitySelector回退功能
+   */
+  const citySelectorCbs = useMemo(() => {
+    return bindActionCreators(
+        {
+            onBack1: hideCitySelector,
+        }, dispatch);
+}, [dispatch]);
+
+  return (
+    <div>
+      <div>
+        <div className="header-wrapper">
+          <Header title="火车票" onBack={onBack} />
+        </div>
+        <form className="form">
+          <Journey
+            from={from}
+            to={to}
+            {...cbs}
+          />
+          <DepartDate />
+          <HighSpeed />
+          <Submit />
+        </form>
+        <CitySelector 
+          show={isDateSelectorVisible}
+          isLoading={isLoadingCityData}
+          cityData={cityData}
+          {...citySelectorCbs}
+        />
+      </div>
+      {renderRoutes(route.routes)}
+    </div>
+  )
+}
 
 
-
+export default React.memo(connect(
+  function mapStateToProps(state) {
+    return state;
+  },
+  function mapDispatchToProps(dispatch) {
+    return { dispatch };
+  }
+)(Home));
+```
 
 ### 5 城市选择浮层-城市的异步加载
+
+- 数据异步加载 uesEffect `src/components/CitySelector.jsx`
+
+- 异步请求 localStorage 数据缓存  store/actions.js
+
+  ​	
+
+  ```react
+  // CitySelector.jsx
+  import React, { useState, useMemo, useEffect } from 'react';
+  const { show, isLoading, cityData, onBack, fetchCityData} = props;
+      // 处理异步请求
+      useEffect(() => {
+          // false, 有数据，加载
+          if(!show || cityData || isLoading){
+              return;
+          }
+          fetchCityData();
+      }, [show, cityData, isLoading])
+  
+  ```
+
+
+
+```react
+// store/actions.js
+// 异步 fetchCityData
+export function fetchCityData() {
+    return (dispatch, getState) => {
+        const {isLoadingCityData} = getState();
+        if(isLoadingCityData) {
+            return;
+        }
+        // 使用缓存数据
+        const cache = JSON.parse(localStorage.getItem('city_data_cache' || '{}'));
+
+        if(Date.now < cache.expires) {
+            dispatch(setCityData(cache.data))
+            return;
+        }
+        dispatch(setIsLoadingCityData(true));
+        fetch('/rest/cities?_' + Date.now())
+            .then(res => res.json())
+            .then(cityData => {
+                dispatch(setCityData(cityData));
+
+            	// 缓存数据
+                localStorage.setItem(
+                    'city_data_cache',
+                    JSON.stringify({
+                        expires: Date.now() * 60 * 1000,
+                        data: cityData
+                    })
+                )
+                dispatch(setIsLoadingCityData(false));
+            })
+            .catch(err => {
+                dispatch(setIsLoadingCityData(false));
+            })
+    }; 
+}
+```
+
+
+
 ### 6 城市选择浮层-渲染城市列表
 ### 7 城市选择浮层-字母快速定位
 ### 8 城市选择浮层-搜索建议

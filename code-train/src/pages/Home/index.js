@@ -14,14 +14,18 @@ import {
   exchangeFromTo,
   showCitySelector,
   hideCitySelector,
+  fetchCityData,
 } from '../../store/actions';
 
 function Home(props) {
   const { route, from, to, dispatch, 
-    cityData, isLoadingCityData, isDateSelectorVisible, 
+    cityData, isLoadingCityData, isDateSelectorVisible,
+    isCitySelectorVisible,
 } = props;
 
-  // console.log(props, 'props');
+  console.log(isDateSelectorVisible, 'isDate');
+  console.log(isCitySelectorVisible, 'isCity');
+  console.log(props, 'props');
 
   // 子组件传函数
   const onBack = useCallback(() => {
@@ -53,7 +57,8 @@ function Home(props) {
   const citySelectorCbs = useMemo(() => {
     return bindActionCreators(
         {
-            onBack1: hideCitySelector,
+            onBack: hideCitySelector,
+            fetchCityData,
         }, dispatch);
 }, [dispatch]);
 
@@ -74,7 +79,7 @@ function Home(props) {
           <Submit />
         </form>
         <CitySelector 
-          show={isDateSelectorVisible}
+          show={isCitySelectorVisible}
           isLoading={isLoadingCityData}
           cityData={cityData}
           {...citySelectorCbs}

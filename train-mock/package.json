@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1"
+    "dayjs": "^1.8.24",
+    "express": "^4.17.1",
+    "mocker-api": "^2.0.1"
   }
 }

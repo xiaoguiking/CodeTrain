@@ -49,6 +49,7 @@ export default {
         }
         return state;
     },
+
     currentSelectingLeftCity(state = false, action) {
         const { type, payload } = action;
         switch (type) {
