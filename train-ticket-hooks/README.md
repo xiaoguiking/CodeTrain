@@ -1069,9 +1069,56 @@ export default React.memo(connect(
 )(Home));
 ```
 
+`Home/index.css`
+
+```css
+.header-wrapper {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 2;
+}
+.form {
+    padding: 5px 15px 0;
+    background: #fff;
+}
+```
+
 
 
 ### 4 城市选择浮层-顶部搜索栏
+
+`src/components/CitySelector.jsx`
+
+```react
+/**
+ * 城市选择浮层 
+ * 1搜索框
+ */
+import React from 'react';
+import './CitySelector.css';
+
+show : true(显示城市选择浮层) ： false（隐藏）
+
+export default function CitySelector(props) {
+    const { show, isLoading, cityData } = props;
+    console.log('CitySelector', props);
+    return (
+        // 声明数组一定包含city-selector,当show为false加入hidden，过滤点无意值filter变成字符串
+        // display: none !important;
+         <div className={["city-selector", (!show)&& 'hidden'].filter(Boolean).join(' ')}>
+            city
+        </div>
+    )
+}
+```
+
+**使用第三方管理动态类**
+
+> yarn add  classnames
+
+
 
 
 

@@ -1,3 +1,6 @@
+/**
+ * 头部公共组件Header
+ */
 import React from 'react'
 import PropTypes from 'prop-types';
 import './Header.css';
@@ -23,7 +26,7 @@ export default function Header(props) {
         </div>
     )
 }
-
+// 静态类型检查
 Header.protoTypes = {
     onBack: PropTypes.func.isRequired,
     title: PropTypes.string.isRequired,

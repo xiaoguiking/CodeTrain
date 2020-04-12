@@ -8,16 +8,21 @@ import DepartDate from './DepartDate.jsx';
 import HighSpeed from './HighSpeed.jsx';
 import Journey from './Journey.jsx';
 import Submit from './Submit.jsx';
+import CitySelector from '../../components/CitySelector';
 
 import {
   exchangeFromTo,
-  showCitySelector
+  showCitySelector,
+  hideCitySelector,
 } from '../../store/actions';
 
 function Home(props) {
-  const { route, from, to, dispatch } = props;
+  const { route, from, to, dispatch, 
+    cityData, isLoadingCityData, isDateSelectorVisible, 
+} = props;
 
-  console.log(props, 'props');
+  // console.log(props, 'props');
+
   // 子组件传函数
   const onBack = useCallback(() => {
     window.history.back();
@@ -42,6 +47,16 @@ function Home(props) {
     }, dispatch)
   }, [dispatch])
 
+  /**
+   * 跳转到CitySelector回退功能
+   */
+  const citySelectorCbs = useMemo(() => {
+    return bindActionCreators(
+        {
+            onBack1: hideCitySelector,
+        }, dispatch);
+}, [dispatch]);
+
   return (
     <div>
       <div>
@@ -58,6 +73,12 @@ function Home(props) {
           <HighSpeed />
           <Submit />
         </form>
+        <CitySelector 
+          show={isDateSelectorVisible}
+          isLoading={isLoadingCityData}
+          cityData={cityData}
+          {...citySelectorCbs}
+        />
       </div>
       {renderRoutes(route.routes)}
     </div>

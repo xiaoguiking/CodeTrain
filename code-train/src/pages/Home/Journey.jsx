@@ -9,7 +9,7 @@ export default function Journey(props) {
     const { from, to, exchangeFromTo, showCitySelector } = props;
     console.log(exchangeFromTo, showCitySelector, 'Journey.jsx');
 
-    
+
     return (
         <div className="journey">
             <div 
