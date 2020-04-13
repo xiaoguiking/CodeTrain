@@ -1,5 +1,5 @@
 /**
- * actions工厂
+ * actions工厂 ACTION crator
  */
 export const ACTION_SET_fROM= 'SET_FROM';
 export const ACTION_SET_TO= 'SET_TO';
@@ -78,7 +78,7 @@ export function hideCitySelector() {
     }
 }
 
-// 封装始发逻辑 异步action
+// 封装始发逻辑 异步action 回调数据 关闭城市选择浮层
 export function setSelectorCity(city) {
     return (dispatch ,getState) => {
         const {currentSelectingLeftCity} = getState();
@@ -87,6 +87,7 @@ export function setSelectorCity(city) {
         } else {
             dispatch(setTo(city));
         }
+        dispatch(hideCitySelector());
     }
 }
 

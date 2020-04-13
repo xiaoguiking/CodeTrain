@@ -8,7 +8,7 @@ import './Journey.css';
 export default function Journey(props) {
     const { from, to, exchangeFromTo, showCitySelector } = props;
     // console.log(exchangeFromTo, showCitySelector, 'Journey.jsx');
-    console.log(showCitySelector, 'showCitySelector');
+    // console.log(showCitySelector, 'showCitySelector');
 
     return (
         <div className="journey">

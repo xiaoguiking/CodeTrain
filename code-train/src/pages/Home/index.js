@@ -15,17 +15,15 @@ import {
   showCitySelector,
   hideCitySelector,
   fetchCityData,
+  setSelectorCity,
 } from '../../store/actions';
 
 function Home(props) {
   const { route, from, to, dispatch, 
-    cityData, isLoadingCityData, isDateSelectorVisible,
+    cityData, isLoadingCityData, //isDateSelectorVisible,
     isCitySelectorVisible,
 } = props;
-
-  console.log(isDateSelectorVisible, 'isDate');
-  console.log(isCitySelectorVisible, 'isCity');
-  console.log(props, 'props');
+  // console.log(props, 'props');
 
   // 子组件传函数
   const onBack = useCallback(() => {
@@ -53,12 +51,15 @@ function Home(props) {
 
   /**
    * 跳转到CitySelector回退功能
+   * 请求城市数据
+   * 选择回填
    */
   const citySelectorCbs = useMemo(() => {
     return bindActionCreators(
         {
             onBack: hideCitySelector,
             fetchCityData,
+            onSelect: setSelectorCity
         }, dispatch);
 }, [dispatch]);
 

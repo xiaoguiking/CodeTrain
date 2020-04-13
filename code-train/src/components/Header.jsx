@@ -7,7 +7,7 @@ import './Header.css';
 
 export default function Header(props) {
     const { onBack, title } = props;
-    console.log(onBack, 'on');
+
     return (
         <div className="header">
             <div className="header-back" onClick={onBack}>

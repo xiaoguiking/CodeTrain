@@ -2,12 +2,6 @@
 
 [TOC]
 
-
-
-
-
-
-
 ## 第六章项目重点火车票业务架构(video)
 
 ###  1.项目业务选型以及演示分析 
@@ -696,7 +690,7 @@ import React from 'react'
   export function showCitySelector(currentSelectingLeftCity) {
       return (dispatch) => {
           dispatch({
-              type: ACTION_SET_IS_DATE_SELECTOR_VISIBLE,
+              type: ACTION_SET_IS_CITY_SELECTOR_VISIBLE,
               payload: true
           });
           dispatch({
@@ -713,7 +707,7 @@ import React from 'react'
       }
   }
   
-  // 封装始发逻辑 异步action
+  // 封装始发逻辑 异步action 回填数据 + 关闭城市选择浮层
   export function setSelectorCity(city) {
       return (dispatch ,getState) => {
           const {currentSelectingLeftCity} = getState();
@@ -722,6 +716,7 @@ import React from 'react'
           } else {
               dispatch(setTo(city));
           }
+          dispatch(hideCitySelector());
       }
   }
   
@@ -755,8 +750,8 @@ import React from 'react'
           payload: departDate,
       };
   }
-  ```
-
+```
+  
   
 
 `公共组件components`
@@ -1348,6 +1343,176 @@ export function fetchCityData() {
 
 
 ### 6 城市选择浮层-渲染城市列表
+
+- 城市列表渲染
+- 组件分级
+- *关于加载数据cityData是否存在情况* ----  actions 数据回填
+
+组件分级
+
+- 最小力度城市条目组件CityItem
+
+  ```react
+  /**
+   * 最小力度城市CityItem
+   */
+  const CityItem = memo(function CityItem(props) {
+      const {
+          name, // 城市名字
+          onSelect
+      } = props;
+      console.log(name, 'name');
+      return (
+          <li className="city-li" onClick={() => onSelect(name) }>
+              {name}
+          </li>
+      )
+  });
+  
+  CityItem.propTypes = {
+      name: PropTypes.string.isRequired,
+      onSelect: PropTypes.func.isRequired
+  }
+  ```
+
+  
+
+- 首字母相同的城市组件集合 CitySection
+
+  ```react
+  /**
+   * 中型首字母相同城市组件集合
+   */
+  const CitySection = memo(function CitySection(props) {
+      const {
+          cities = [],
+          title,   //A,B
+          onSelect
+      } = props;
+      
+      return (
+          <ul className="city-ul">
+              <li className="city-li" key="title">
+                  {title}
+              </li>
+              {
+                  cities.map(city => { 
+                      return (
+                          <CityItem
+                              key={city.name}
+                              name={city.name}
+                              onSelect={onSelect}
+                          />
+                      )
+                  })
+              }
+          </ul>
+      )
+  });
+  
+  CitySection.propTypes = {
+      cities: PropTypes.array,
+      title: PropTypes.string.isRequired,
+      onSelect: PropTypes.func.isRequired
+  }
+  ```
+
+  
+
+- 最大力度整个列表 CityList
+
+  ```react
+  /**
+   * 整个列表CityList
+   */
+  const CityList = memo(function CityList(props) {
+      const {
+          sections, // 集合
+          onSelect
+      } = props;
+  
+      return (
+          <div className="city-list">
+              <div className="city-cate">
+                  {
+                      sections.map(section => {
+                          return (
+                              <CitySection 
+                                  title={section.title}
+                                  key={section.title}
+                                  cities={section.citys}
+                                  onSelect={onSelect}
+                              />
+                          )
+                      })
+                  }
+              </div>
+          </div>
+      )
+  });
+  
+  CityList.propTypes = {
+      sections: PropTypes.array.isRequired,
+      onSelect: PropTypes.func.isRequired
+  }
+  ```
+
+- 关于是否加载数据存在
+
+  ```react
+     const outputCitySections = () => {
+           if(isLoading){
+              return (<div>loading</div>)
+           }
+  
+           if(cityData) {
+               console.log('cityData',cityData.cityList);
+               return (
+                   <CityList 
+                      sections={cityData.cityList}
+                      onSelect={onSelect} 
+                  />
+               )
+          }
+  
+          return (<div>error</div>)
+      }
+     return (
+          <div className={classnames('city-selector', { hidden: !show })}>
+              <div className="city-search">
+                  <div className="search-back" onClick={() => onBack()}>
+                      <svg width="42" height="42">
+                          <polyline
+                              points="25, 13, 16, 21, 25, 29"
+                              stroke="#fff"
+                              strokeWidth="2"
+                              fill="none"
+                          />
+                      </svg>
+                  </div>
+                  <div className="search-input-wrapper">
+                      <input
+                          type="text"
+                          value={searchKey}
+                          className="search-input"
+                          placeholder="城市、车站的中文或拼音"
+                          onChange={(e) => setSearchKey(e.target.value)}
+                      />
+                  </div>
+                  <i
+                      className={classnames("search-clean", { hidden: key.length === 0 })}
+                      onClick={() => setSearchKey('')}
+                  >
+                      &#xf063;
+              </i>
+              </div>  // 关键代码
+                  {outputCitySections()}
+          </div>
+      )
+  ```
+
+  
+
 ### 7 城市选择浮层-字母快速定位
 ### 8 城市选择浮层-搜索建议
 ### 9 出发日期控件
