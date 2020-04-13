@@ -3,9 +3,10 @@
  * 1搜索框
  * 2.回退功能
  * 3.fetchCityData异步数据
- * 4.
+ * 4.CityList/CityItem/CitySection 组件
+ * 5.字母快速定位
  */
-import React, { useState, useMemo, useEffect, memo } from 'react';
+import React, { useState, useMemo, useEffect, memo, useCallback } from 'react';
 import './CitySelector.css';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
@@ -21,7 +22,7 @@ const CityItem = memo(function CityItem(props) {
     } = props;
     console.log(name, 'name');
     return (
-        <li className="city-li" onClick={() => onSelect(name) }>
+        <li className="city-li" onClick={() => onSelect(name)}>
             {name}
         </li>
     )
@@ -41,14 +42,14 @@ const CitySection = memo(function CitySection(props) {
         title,   //A,B
         onSelect
     } = props;
-    
+
     return (
         <ul className="city-ul">
-            <li className="city-li" key="title">
+            <li className="city-li" key="title" data-cate={title}>
                 {title}
             </li>
             {
-                cities.map(city => { 
+                cities.map(city => {
                     return (
                         <CityItem
                             key={city.name}
@@ -67,13 +68,42 @@ CitySection.propTypes = {
     title: PropTypes.string.isRequired,
     onSelect: PropTypes.func.isRequired
 }
+
+/**
+ * 1.右侧字母列表显示
+ * 2.点击响应 
+ */
+const AlphaIndex = memo(function AlphaIndex(props) {
+    const {
+        alpha, //指定字母的字符串表示
+        onClick, // 回调点击事件
+    } = props;
+    return (
+        <div className="city-index-item" onClick={() => onClick(alpha)}>
+            {alpha}
+        </div>
+    )
+})
+
+AlphaIndex.propTypes = {
+    alpha: PropTypes.string.isRequired,
+    onClick: PropTypes.func.isRequired
+}
+
+// 获取26个字母的数组， ele遍历的数组成员 index需要的序号
+const alphabet = Array.from(new Array(26), (ele, index) => {
+    return String.fromCharCode(65 + index);
+});
+
+
 /**
  * 整个列表CityList
  */
 const CityList = memo(function CityList(props) {
     const {
         sections, // 集合
-        onSelect
+        onSelect,
+        toAlpha,
     } = props;
 
     return (
@@ -82,7 +112,7 @@ const CityList = memo(function CityList(props) {
                 {
                     sections.map(section => {
                         return (
-                            <CitySection 
+                            <CitySection
                                 title={section.title}
                                 key={section.title}
                                 cities={section.citys}
@@ -92,13 +122,26 @@ const CityList = memo(function CityList(props) {
                     })
                 }
             </div>
+            <div className="city-index">
+                {
+                    alphabet.map(alpha => {
+                        return (
+                            <AlphaIndex
+                                key={alpha}
+                                alpha={alpha}
+                                onClick={toAlpha}
+                            />)
+                    })
+                }
+            </div>
         </div>
     )
 });
 
 CityList.propTypes = {
     sections: PropTypes.array.isRequired,
-    onSelect: PropTypes.func.isRequired
+    onSelect: PropTypes.func.isRequired,
+    toAlpha: PropTypes.func.isRequired
 }
 
 export default function CitySelector(props) {
@@ -122,22 +165,28 @@ export default function CitySelector(props) {
 
     // 关于加载数据cityData是否存在情况
     const outputCitySections = () => {
-         if(isLoading){
+        if (isLoading) {
             return (<div>loading</div>)
-         }
+        }
 
-         if(cityData) {
-             console.log('cityData',cityData.cityList);
-             return (
-                 <CityList 
+        if (cityData) {
+            
+            return (
+                <CityList
                     sections={cityData.cityList}
-                    onSelect={onSelect} 
+                    onSelect={onSelect}
+                    toAlpha={toAlpha}
                 />
-             )
+            )
         }
 
         return (<div>error</div>)
     }
+
+    // toAlpha
+    const toAlpha = useCallback((alpha) => {
+        document.querySelector(`[data-cate='${alpha}']`).scrollIntoView();
+    },[]);
 
     return (
         <div className={classnames('city-selector', { hidden: !show })}>
@@ -168,7 +217,7 @@ export default function CitySelector(props) {
                     &#xf063;
             </i>
             </div>
-                {outputCitySections()}
+            {outputCitySections()}
         </div>
     )
 }

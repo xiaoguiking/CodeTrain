@@ -750,6 +750,7 @@ import React from 'react'
           payload: departDate,
       };
   }
+  ```
 ```
   
   
@@ -767,7 +768,7 @@ import React from 'react'
           <div>Header</div>
       )
   }
-  ```
+```
 
   
 
@@ -1514,6 +1515,85 @@ export function fetchCityData() {
   
 
 ### 7 城市选择浮层-字母快速定位
+
+- 渲染右边字母表
+
+- 实现点击右边字母表联动
+
+  `src/components/CitySelector.jsx`
+
+  ```react
+  // 1.右侧字母列表显示
+  // 2.点击响应
+  const AlphaIndex = memo(function AlphaIndex(props) => {
+  		const {
+                alpha, //指定字母的字符串显示
+                onClick, //回调
+       } = props;
+  	return (
+      <div className="city-index-item" onClick={() => onClick(alpha)}
+          {alpha}
+        </div>
+      )
+  })
+  
+  AlphaIndex.propTypes = {
+      alpha: PropTypes.string.isReuqired,
+      onClick: PropTypes.func.isRequired
+  }
+          
+          
+  // 获取26的字母的数组，ele数组成员，index需要的序号
+  
+  const alphabet = Array.from(new Array(26), (ele, index) => {
+           return String.fromCharCode(65 + index);        
+  })
+              
+              
+              
+   // CityList           
+   const CityList = memo(function CityList(props) {
+      const {
+          sections, // 集合
+          onSelect,
+          toAlpha,
+      } = props;
+  
+      return (
+          <div className="city-list">
+              <div className="city-cate">
+                  {
+                      sections.map(section => {
+                          return (
+                              <CitySection
+                                  title={section.title}
+                                  key={section.title}
+                                  cities={section.citys}
+                                  onSelect={onSelect}
+                              />
+                          )
+                      })
+                  }
+              </div>
+              <div className="city-index">
+                  {
+                      alphabet.map(alpha => {
+                          return (
+                              <AlphaIndex
+                                  key={alpha}
+                                  alpha={alpha}
+                                  onClick={toAlpha} // 关键代码
+                              />)
+                      })
+                  }
+              </div>
+          </div>
+      )
+  });
+  ```
+
+  
+
 ### 8 城市选择浮层-搜索建议
 ### 9 出发日期控件
 ### 10 日期选择浮层-搭建
