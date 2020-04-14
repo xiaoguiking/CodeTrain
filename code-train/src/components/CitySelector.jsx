@@ -1,3 +1,4 @@
+
 /**
  * 城市选择浮层 
  * 1搜索框
@@ -5,11 +6,14 @@
  * 3.fetchCityData异步数据
  * 4.CityList/CityItem/CitySection 组件
  * 5.字母快速定位
+ * 6.搜索建议功能
  */
+
 import React, { useState, useMemo, useEffect, memo, useCallback } from 'react';
 import './CitySelector.css';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
+
 
 
 /**
@@ -20,7 +24,7 @@ const CityItem = memo(function CityItem(props) {
         name, // 城市名字
         onSelect
     } = props;
-    console.log(name, 'name');
+
     return (
         <li className="city-li" onClick={() => onSelect(name)}>
             {name}
@@ -144,10 +148,90 @@ CityList.propTypes = {
     toAlpha: PropTypes.func.isRequired
 }
 
+/**
+ * 1.搜索建议组件单个条目SuggestItem
+ */
+const SuggestItem = memo(function Suggestion(props) {
+    const {
+        name, // 城市名字
+        onClick
+    } = props;
+
+    return (
+        <div className="city-suggest-li" onClick={() => onClick(name)}>
+            {name}
+        </div>
+    )
+})
+
+SuggestItem.propTypes = {
+    name: PropTypes.string.isRequired,
+    onClick: PropTypes.func.isRequired
+}
+
+/**
+ * 2.SuggestItem父级组件
+ */
+const Suggest = memo(function Suggest(props) {
+    const {
+        searchKey, // 搜索内容 发送请求
+        onSelect
+    } = props;
+  
+    // 存储搜索结果
+    const [result, setResult] = useState([]);
+
+    // searchKey请求
+    useEffect(() => {
+        fetch('/rest/search?key=' + encodeURIComponent(searchKey))  
+        .then(res => res.json())
+        .then(data => {
+            const {result, searchKey: sKey} = data;
+            
+            if(sKey === searchKey) {
+                setResult(result)
+            }
+        }) 
+    }, [searchKey]);
+
+    // 优化没有结果的搜索
+    const fallBackResult = useMemo(() => {
+        if (!result.length) {
+            return [
+                {
+                    display: searchKey,
+                },
+            ];
+        }
+
+        return result;
+    }, [result, searchKey]);
+
+
+    return (
+        <div className="city-suggest">
+            <ul className="city-suggest-ul">
+                {fallBackResult.map(item => {
+                    return (
+                        <SuggestItem
+                            key={item.display}
+                            name={item.display}
+                            onClick={onSelect}
+                        />
+                    );
+                })}
+            </ul>
+        </div>
+    );
+})
+
+Suggest.propTypes = {
+    searchKey: PropTypes.string.isRequired,
+    onSelect: PropTypes.func.isRequired
+}
+
 export default function CitySelector(props) {
     const { show, isLoading, cityData, onBack, fetchCityData, onSelect } = props;
-    // console.log('CitySelector', props);
-    // console.log('onback', onBack);
     // 动态处理css类名
 
     // 保存搜索的内容
@@ -217,6 +301,14 @@ export default function CitySelector(props) {
                     &#xf063;
             </i>
             </div>
+            {
+                Boolean(key) && (
+                    <Suggest 
+                        searchKey={key}
+                        onSelect={key => onSelect(key)}
+                    />
+                )
+            }
             {outputCitySections()}
         </div>
     )
