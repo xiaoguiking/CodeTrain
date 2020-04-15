@@ -8,7 +8,8 @@ import DepartDate from './DepartDate.jsx';
 import HighSpeed from './HighSpeed.jsx';
 import Journey from './Journey.jsx';
 import Submit from './Submit.jsx';
-import CitySelector from '../../components/CitySelector';
+import CitySelector from '../../components/CitySelector'; // 城市选择浮层
+import DateSelector from '../../components/DateSelector'; // 日期选择浮层
 
 import {
   exchangeFromTo,
@@ -17,6 +18,7 @@ import {
   fetchCityData,
   setSelectorCity,
   showDateSelector, // 日期选择浮层
+  hideDateSelector,
 } from '../../store/actions';
 
 function Home(props) {
@@ -25,7 +27,8 @@ function Home(props) {
     dispatch, 
     cityData, isLoadingCityData, 
     isCitySelectorVisible,
-    departDate
+    isDateSelectorVisible,
+    departDate,
 } = props;
   // console.log(props, 'props');
 
@@ -76,6 +79,12 @@ function Home(props) {
     }, dispatch)
   }, [dispatch])
 
+  const dateSelectorCbs = useMemo(() => {
+    return bindActionCreators({
+      onBack: hideDateSelector,
+    },dispatch)
+  }, [dispatch])
+
   return (
     <div>
       <div>
@@ -100,6 +109,10 @@ function Home(props) {
           isLoading={isLoadingCityData}
           cityData={cityData}
           {...citySelectorCbs}
+        />
+        <DateSelector 
+          show={isDateSelectorVisible}
+          {...dateSelectorCbs}
         />
       </div>
       {renderRoutes(route.routes)}
