@@ -16,12 +16,16 @@ import {
   hideCitySelector,
   fetchCityData,
   setSelectorCity,
+  showDateSelector, // 日期选择浮层
 } from '../../store/actions';
 
 function Home(props) {
-  const { route, from, to, dispatch, 
-    cityData, isLoadingCityData, //isDateSelectorVisible,
+  const { 
+    route, from, to, 
+    dispatch, 
+    cityData, isLoadingCityData, 
     isCitySelectorVisible,
+    departDate
 } = props;
   // console.log(props, 'props');
 
@@ -63,6 +67,15 @@ function Home(props) {
         }, dispatch);
 }, [dispatch]);
 
+/**
+ * 日期选择浮层
+ */
+  const departDateCbs = useMemo(() => {
+    return bindActionCreators({
+      onClick: showDateSelector
+    }, dispatch)
+  }, [dispatch])
+
   return (
     <div>
       <div>
@@ -75,7 +88,10 @@ function Home(props) {
             to={to}
             {...cbs}
           />
-          <DepartDate />
+          <DepartDate 
+            time={departDate}
+            {...departDateCbs}
+          />
           <HighSpeed />
           <Submit />
         </form>

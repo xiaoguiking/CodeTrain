@@ -1596,9 +1596,103 @@ export function fetchCityData() {
 
 ### 8 城市选择浮层-搜索建议
 
-- 搜索后 name -- onClick
+- 搜索单个条目SuggestItem
+
+  ```react
+  const SuggestItem = memo(function SuggestItem(props) {
+      const {
+          name, // 城市名字
+          onCLick
+            } = props;
+      return (
+       <div className="city-suggest-li" onClick={() => onClick(name)}>
+       	{name}
+        </div>
+      )
+  })
+  
+  SuggestItem.propTypes = {
+      name: PropTypes.string.isRequired,
+      onClick: PropTypes.func.isRequired
+  }
+  ```
+
+  
+
+- Suggest父级组件
+
+  ```react
+  const Suggest = memo(function Suggest(props) {
+      const {
+          searchkey,  // 搜索内容，发送请求使用
+          onSelect 
+      } = props;
+      
+       const [result, setResult] = useState([]);
+      
+      // searchKey请求处理副作用
+      useEffect(() => {
+          fetch('/rest/searchKye?key=' + encodeURlComponent(searchKey))
+          .then(res => res.json())
+          .then(data => {
+              const {result. searchKey: skey} = data;
+          	if(sKey ==== searchKey) {
+                  setResult(result)
+              }
+          })
+      },[searchKey])
+      // 优化没有结果时候搜索返回
+      const fallBackResult = useMemo(() => {
+          if(!resutl.length){
+              retturn [{display: searchKey}]
+          }
+          return result;
+      }, [result, searchKey])
+      
+      return (
+      	<div className="city-suggest">
+          	<ul className="city-suggest-ul">
+              	{
+                      // 优化使用
+                      fallBackResult.map(item => {
+                          return (
+                          <SuggestItem  
+                           key={item.display}   
+                           name={item.display}
+                           onClick={onSelect}
+                           ></SuggestItem>
+                          )
+                      })
+                  }
+              </ul>
+          </div>
+      )
+  })
+  ```
+
+  
+
+- CitySelector中组件使用
+
+  ```react
+  {
+      Boolean(key) && (
+      	<Suggest 
+              searchkey = {key}
+              onSelect= {key => onSelect(key)}
+      )
+  }
+  ```
+
+  
+
+  
 
 ### 9 出发日期控件
+
+- `src/Home/DepartDate.jsx`
+- 
+
 ### 10 日期选择浮层-搭建
 ### 11 日期选择浮层-日历组件(上)
 ### 12 日期选择浮层-日历组件(下)

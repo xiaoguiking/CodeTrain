@@ -26,7 +26,7 @@ module.exports = {
     },
     'GET /rest/query'(req, res) {
         const response = require('./rest/query.json');
-
+ 
         response.dataMap.directTrainInfo.trains = response.dataMap.directTrainInfo.trains.reverse();
 
         return res.json(response);

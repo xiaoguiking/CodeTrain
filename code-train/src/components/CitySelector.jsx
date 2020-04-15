@@ -151,7 +151,7 @@ CityList.propTypes = {
 /**
  * 1.搜索建议组件单个条目SuggestItem
  */
-const SuggestItem = memo(function Suggestion(props) {
+const SuggestItem = memo(function SuggestItem(props) {
     const {
         name, // 城市名字
         onClick
@@ -170,7 +170,7 @@ SuggestItem.propTypes = {
 }
 
 /**
- * 2.SuggestItem父级组件
+ * 2.Suggest父级组件
  */
 const Suggest = memo(function Suggest(props) {
     const {
